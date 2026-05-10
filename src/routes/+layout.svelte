@@ -129,19 +129,9 @@ function openTracker() {
 	</main>
 
 	<!-- Floating Action Button for Mobile+Desktop (center-right) -->
-	<button class="fab" on:click={openTracker} aria-label="Neues Training (Schnellzugriff)">
-		+
-	</button>
+	<a href="/trainings" class="fab" aria-label="Neues Training">
+    +
+</a>
 
-	<!-- Bottom drawer for mobile that contains the Tracker form -->
-	{#if $showBottomDrawer}
-		<div class="bottom-drawer open" role="dialog" aria-modal="true">
-			<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-				<strong>Neues Training</strong>
-				<button on:click={() => showBottomDrawer.set(false)}>Schließen</button>
-			</div>
-			<!-- Tracker component will dispatch input events to update the parent form fields -->
-			<Tracker on:input={(e) => {/* parent can handle live updates if needed */}} />
-		</div>
-	{/if}
+
 </div>

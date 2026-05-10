@@ -116,6 +116,16 @@ Fasst die technische Realisierung zusammen.
 
 Migration auf Svelte 5 (Runes):
 Während der Implementierung wurde die Reaktivitäts-Logik von Svelte 4 (export let, $:) auf die modernsten Svelte 5 Runes ($state, $derived, $props) migriert. Dies stellt sicher, dass der Prototyp die aktuellste Reaktivitäts-Engine nutzt, was zu einer performanteren Synchronisation zwischen den GPS-Sensordaten und der Benutzeroberfläche führt.
+
+Architektur-Refactoring & Routing
+Im Zuge der Qualitätssicherung wurde die Architektur von einem globalen Drawer-Modell auf ein dediziertes Routing-Modell umgestellt:
+
+Trennung der Zuständigkeiten (Separation of Concerns): Der Tracker wurde aus dem globalen Layout in eine eigene Route (/trainings) verschoben. Dies vereinfacht die Wartbarkeit und ermöglicht eine saubere Anbindung an die SvelteKit Form Actions.
+
+Datenfluss: Die Daten werden von der Tracker.svelte-Komponente via Custom Events an das Page-Level-Formular (+page.svelte) übergeben. Von dort erfolgt die Übermittlung an die serverseitige Logik (+page.server.js), welche die Validierung und Persistierung in der MongoDB übernimmt.
+
+Analytics-Erweiterung: Durch die Integration der calories.js wird bei jedem Speichervorgang automatisch der energetische Aufwand basierend auf den MET-Faktoren (Metabolic Equivalent of Task) berechnet und als zusätzlicher Datenpunkt gespeichert.
+
 - **Technologie-Stack:** _[SvelteKit, Bibliotheken falls genutzt]_
 - **Tooling:** _[IDE/Erweiterungen, lokale/Cloud-Tools; den Einsatz von KI beschreiben Sie im Kapitel **KI-Deklaration**]_  
 - **Struktur & Komponenten:** _[Seiten, Routen, State/Stores, wichtige Komponenten]_
