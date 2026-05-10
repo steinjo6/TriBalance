@@ -36,7 +36,7 @@ Designentscheidungen: Nutzung eines numerischen Sliders (1-5) für den Mental-Fo
 Eingesetzte Tools: GitHub Copilot (Code-Vorschläge), Gemini (Architekturberatung & Prompt-Erstellung).  
 
 Zweck & Umfang: Erstellung des technischen Grundgerüsts, Unterstützung bei der MongoDB-Anbindung und Generierung der Logik für das Live-Tracking.
-Prompt-Vorgehen
+Prompt-Vorgehen:
 Einsatz eines strukturierten Master-Prompts zur Definition der App-Architektur und der spezifischen Workflows (Stoppuhr, Geolocation API). Die Verantwortung für die Korrektheit des Codes liegt vollständig bei mir.)
 7. [Anhang [Optional]](#7-anhang-optional)
 
@@ -79,6 +79,16 @@ Die Durchführung erfolgt phasenbasiert; dokumentieren Sie die wichtigsten Ergeb
 ### 3.4 Prototype
 
 #### 3.4.1. Entwurf (Design)
+3.4.1 Globales Layout und Navigation (+layout.svelte)
+Das Layout bildet das funktionale Gerüst der Applikation TriBalance. Es wurde nach dem Desktop-First-Prinzip entwickelt, bietet jedoch durch reaktive CSS-Klassen eine vollständige mobile Adaption.
+
+Architektur: Nutzung des SvelteKit-Layout-Systems, um eine persistente Navigation über alle Unterseiten hinweg zu gewährleisten.
+
+Sidebar-Logik: Auf Viewports > 1024px ist eine 280px breite Sidebar fixiert. Dies minimiert die kognitive Last, da die Navigationselemente (Dashboard, Training, Profil) stets sichtbar sind.
+
+Mobile Adaption: Über Tailwind Media-Queries bricht die Sidebar auf kleineren Bildschirmen in einen Bottom-Drawer um. Dies entspricht dem "Thumb-Zone"-Design, um die Einhandbedienung auf Smartphones zu erleichtern.
+
+Floating Action Button (FAB): Ein zentraler "+" Button dient als primärer Call-to-Action (CTA), um den "Interaction Cost" für die Erfassung neuer Trainings so gering wie möglich zu halten.
 Beschreibt die Gestaltung und Interaktion.
 > **Hinweis:** Hier wird der **Prototyp** beschrieben, nicht das **Mockup**.
 - **Informationsarchitektur:** _[z. B. Seiten/Navigation: Konzept, nicht die technische Umsetzung]_
@@ -86,6 +96,22 @@ Beschreibt die Gestaltung und Interaktion.
 - **Designentscheidungen:** _[zentrale Entscheidungen und Begründungen]_
 
 #### 3.4.2. Umsetzung (Technik)
+3.4.2 Die Tracker-Komponente (Tracker.svelte)
+Die Tracker-Komponente ist das technologische Herzstück des Prototyps. Sie kombiniert zeitliche Erfassung mit räumlicher Logik.
+
+Echtzeit-Stoppuhr: Implementiert über ein setInterval, das die Dauer in Minuten berechnet und über Svelte-Reaktivität (duration) sofort im UI spiegelt.
+
+Geolocation & Haversine-Formel: Um die zurückgelegte Distanz ohne externe API-Kosten zu berechnen, nutzt die Komponente die native Web Geolocation API. Da die Erde keine Scheibe ist, wird für die Distanzberechnung zwischen zwei Koordinatenpunkten die Haversine-Formel verwendet:
+
+Diese berechnet den Großkreisabstand zwischen zwei Punkten auf einer Kugel.
+
+SSR-Sicherheit: Da die navigator.geolocation-API nur im Browser existiert, wurde die gesamte Abfrage-Logik in den onMount-Lifecycle-Hook gekapselt. Dies verhindert Abstürze während des Server-Side-Renderings (SSR) von SvelteKit.
+
+Daten-Synchronisation: Mittels eines EventDispatchers werden alle erfassten Daten (Distanz, Dauer, Mental-Score, Pain-Level) live an das übergeordnete Formular gemeldet, was eine nahtlose User Experience ermöglicht.
+Die Distanzberechnung erfolgt über die Haversine-Formel:
+$$d = 2r \arcsin\left(\sqrt{\sin^2\left(\frac{\phi_2-\phi_1}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\lambda_2-\lambda_1}{2}\right)}\right)$$
+
+Robustheit: Ein eingebauter Filter ignoriert GPS-Sprünge (Glitch-Filter), falls die berechnete Distanz zwischen zwei Messpunkten unrealistisch hoch ist.
 Fasst die technische Realisierung zusammen.
 - **Technologie-Stack:** _[SvelteKit, Bibliotheken falls genutzt]_
 - **Tooling:** _[IDE/Erweiterungen, lokale/Cloud-Tools; den Einsatz von KI beschreiben Sie im Kapitel **KI-Deklaration**]_  
@@ -105,6 +131,8 @@ Fasst die technische Realisierung zusammen.
 - **Abgeleitete Verbesserungen:** _[Anforderungen, die als nächstes umgesetzt werden sollten, priorisiert, kurz begründet; falls Verbesserungen im Prototyp konkret umgesetzt wurden: In Kap. 4 dokumentieren]_  
 
 ## 4. Erweiterungen [Optional]
+Warnsystem (Mental & Physisch)
+Pain-Level-Monitoring: Die App visualisiert Belastungen über ein Schwellenwert-System. Werte über 7 (auf einer Skala von 0-10) triggern eine visuelle Warnung. Dies dient der Verletzungsprävention und ist ein Alleinstellungsmerkmal gegenüber Standard-Lauf-Apps.
 Dokumentiert Erweiterungen über den Mindestumfang hinaus.
 > **Hinweis:** Jede Erweiterung ist separat nach dem folgenden Schema zu beschreiben.
 
