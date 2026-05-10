@@ -11,11 +11,15 @@ import { writable } from 'svelte/store';
 const dispatcher = createEventDispatcher();
 
 // Form fields (exported so Parent optional direkt binden kann)
-export let sport: 'Schwimmen' | 'Rad' | 'Lauf' = 'Rad';
-export let distance = 0; // in kilometers
-export let duration = 0; // in minutes
-export let mentalScore = 3; // 1-5
-export let painLevel = 0; // 0-10
+// Svelte 5 State-Variablen (reaktiv)
+let sport = $state('Rad');
+let distance = $state(0);
+let duration = $state(0);
+let mentalScore = $state(3);
+let painLevel = $state(0);
+
+//Props von aussen empfangen:
+let { initialSport = 'Rad' } = $props();
 
 // Stopwatch internal state
 let running = false;
@@ -115,7 +119,7 @@ onDestroy(() => {
 });
 
 // Simple validation helper for client-side; final validation must be server-side
-$: valid = distance >= 0 && duration >= 0 && ['Schwimmen', 'Rad', 'Lauf'].includes(sport);
+let valid = $derived(distance >= 0 && duration >= 0 && ['Schwimmen', 'Rad', 'Lauf'].includes(sport));
 
 </script>
 

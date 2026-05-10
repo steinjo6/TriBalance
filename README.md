@@ -113,6 +113,9 @@ $$d = 2r \arcsin\left(\sqrt{\sin^2\left(\frac{\phi_2-\phi_1}{2}\right) + \cos(\p
 
 Robustheit: Ein eingebauter Filter ignoriert GPS-Sprünge (Glitch-Filter), falls die berechnete Distanz zwischen zwei Messpunkten unrealistisch hoch ist.
 Fasst die technische Realisierung zusammen.
+
+Migration auf Svelte 5 (Runes):
+Während der Implementierung wurde die Reaktivitäts-Logik von Svelte 4 (export let, $:) auf die modernsten Svelte 5 Runes ($state, $derived, $props) migriert. Dies stellt sicher, dass der Prototyp die aktuellste Reaktivitäts-Engine nutzt, was zu einer performanteren Synchronisation zwischen den GPS-Sensordaten und der Benutzeroberfläche führt.
 - **Technologie-Stack:** _[SvelteKit, Bibliotheken falls genutzt]_
 - **Tooling:** _[IDE/Erweiterungen, lokale/Cloud-Tools; den Einsatz von KI beschreiben Sie im Kapitel **KI-Deklaration**]_  
 - **Struktur & Komponenten:** _[Seiten, Routen, State/Stores, wichtige Komponenten]_
