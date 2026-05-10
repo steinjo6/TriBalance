@@ -126,6 +126,15 @@ Datenfluss: Die Daten werden von der Tracker.svelte-Komponente via Custom Events
 
 Analytics-Erweiterung: Durch die Integration der calories.js wird bei jedem Speichervorgang automatisch der energetische Aufwand basierend auf den MET-Faktoren (Metabolic Equivalent of Task) berechnet und als zusätzlicher Datenpunkt gespeichert.
 
+Implementierung des Routing-Konzepts
+"Um eine klare Trennung zwischen der Datenerfassung und der Datenvisualisierung zu schaffen, wurde das ursprüngliche Single-Page-Design in ein Multi-Route-System überführt:
+
+/trainings (Write): Dedizierte Route für die Trainingserfassung. Hier wird die Tracker-Komponente genutzt, um via SvelteKit Form Actions Daten asynchron an die MongoDB zu senden.
+
+/dashboard (Read): Zentrale Übersicht, die beim Laden der Seite (+page.server.js) alle Einträge aus der Datenbank abruft. Durch die Integration der calories.js-Logik werden die Rohdaten (Dauer/Sportart) in Echtzeit in verbrannte Kalorien umgerechnet und visualisiert.
+
+Status-Indikatoren: Einträge mit einem Schmerzniveau (Pain-Level) über 7 werden im Dashboard automatisch optisch hervorgehoben, um auf potenzielle Überlastungen hinzuweisen."
+
 - **Technologie-Stack:** _[SvelteKit, Bibliotheken falls genutzt]_
 - **Tooling:** _[IDE/Erweiterungen, lokale/Cloud-Tools; den Einsatz von KI beschreiben Sie im Kapitel **KI-Deklaration**]_  
 - **Struktur & Komponenten:** _[Seiten, Routen, State/Stores, wichtige Komponenten]_
