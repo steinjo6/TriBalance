@@ -1,10 +1,17 @@
 // src/lib/server/db.js
 import { MongoClient } from 'mongodb';
-import { MONGODB_URI } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+
+// Holt die URI absolut sicher und direkt ab
+const uri = env.MONGODB_URI;
+
+if (!uri) {
+    console.error(">>> FEHLER: MONGODB_URI konnte nicht geladen werden! Überprüfe deine .env Datei.");
+}
 
 // Erstelle einen Singleton-Client, um zu verhindern, dass bei jedem 
 // Neuladen der App (Hot Reload) eine neue Verbindung geöffnet wird.
-const client = new MongoClient(MONGODB_URI);
+const client = new MongoClient(uri || 'mongodb://localhost:27017/tribalance');
 
 /**
  * Stellt die Verbindung zur MongoDB her.
