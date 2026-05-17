@@ -1,203 +1,112 @@
-# Projektdokumentation - [Projekttitel]
+# Projektdokumentation - TriBalance
 
 ## Inhaltsverzeichnis
 
-1. [Ausgangslage](#1-ausgangslage Problem: Triathleten konzentrieren sich im Training oft rein auf physische Metriken (Distanz, Tempo). Die mentale Verfassung und das subjektive Empfinden werden vernachlässigt, was langfristig die Gesundheit und den Erfolg gefährdet.  Ziele: Entwicklung eines interaktiven Multi-Sport-Logbuchs, das physische Leistungsdaten mit einem "Mental-Strength-Log" verknüpft.  Primäre Zielgruppe: Ambitionierte Triathleten (Schwimmen, Radfahren, Laufen), die eine ganzheitliche Übersicht über ihre Belastung suchen. )
-2. [Lösungsidee](#2-lösungsidee Kernfunktionalität:
-
-Erfassung von Einheiten via interaktivem Formular (Sportart, Dauer, Intensität).  
-
-Integriertes Tracking der psychischen Verfassung und des Fokus-Levels.  
-
-Analyse-Dashboard zur Visualisierung von physischen Statistiken und mentalen Trends.  
-
-Bearbeitungsfunktion für historische Einträge zur Reflexion.)
+1. [Ausgangslage](#1-ausgangslage)
+2. [Lösungsidee](#2-lösungsidee)
 3. [Vorgehen & Artefakte](#3-vorgehen--artefakte)
-    1. [Understand & Define](#31- Wesentliche Erkenntnisse: Es fehlt ein Tool, das physische Leistung und psychische Belastbarkeit einfach miteinander verknüpft.  
-
-
-HMW-Frage: Wie könnten wir Triathleten helfen, den Zusammenhang zwischen mentaler Stärke und physischem Training sichtbar zu machen?.)
-    2. [Sketch](#32-sketch Variantenüberblick: Erstellung von 8 Varianten für das zentrale Log-Feature mittels der Crazy 8s Methodik.  Skizzen: Fokus auf verschiedene Ansichten wie "Kalender-Fokus", "Emoji-Tagebuch" oder "Chat-Eingabe".)
-    3. [Decide](#33-decide Gewählte Variante: Kombination aus einer strukturierten Kalenderansicht und einem zentralen Dashboard.  
-
-
-Begründung: Diese Kombination bietet die beste zeitliche Übersicht bei gleichzeitig schneller visueller Rückmeldung über den mentalen Zustand.  
-
-Mockup: Erstellt in Figma; Mobile-First-Ansatz, da Triathleten Einheiten oft unmittelbar nach dem Training unterwegs loggen möchten.)
-    4. [Prototype](#34-prototype Informationsarchitektur: Navigation über eine fixierte Bottom Tab Bar mit den Kernbereichen Dashboard, Kalender und Einstellungen.  
-
-
-Designentscheidungen: Nutzung eines numerischen Sliders (1-5) für den Mental-Fokus zur Senkung der "Interaction Cost". Technologie-Stack: SvelteKit (HTML/CSS/JavaScript), MongoDB zur Datenspeicherung.  Tooling: Visual Studio Code.  Daten & Schnittstellen: Persistenz via MongoDB; Anbindung über ein zentrales Datenbank-Modul (src/lib/server/db.js). )
+    1. [Understand & Define](#31-understand--define)
+    2. [Sketch](#32-sketch)
+    3. [Decide](#33-decide)
+    4. [Prototype](#34-prototype)
+        1. [Entwurf (Design)](#341-entwurf-design)
+        2. [Umsetzung (Technik)](#342-umsetzung-technik)
     5. [Validate](#35-validate)
-4. [Erweiterungen [Optional]](#4-erweiterungen-optional)
-5. [Projektorganisation [Optional]](#5-projektorganisation-optional)
-6. [KI-Deklaration](#6-ki-deklaration KI-Tools
-
-Eingesetzte Tools: GitHub Copilot (Code-Vorschläge), Gemini (Architekturberatung & Prompt-Erstellung).  
-
-Zweck & Umfang: Erstellung des technischen Grundgerüsts, Unterstützung bei der MongoDB-Anbindung und Generierung der Logik für das Live-Tracking.
-Prompt-Vorgehen:
-Einsatz eines strukturierten Master-Prompts zur Definition der App-Architektur und der spezifischen Workflows (Stoppuhr, Geolocation API). Die Verantwortung für die Korrektheit des Codes liegt vollständig bei mir.)
+4. [Erweiterungen](#4-erweiterungen)
+5. [Projektorganisation](#5-projektorganisation)
+6. [KI-Deklaration](#6-ki-deklaration)
 7. [Anhang [Optional]](#7-anhang-optional)
 
-> **Hinweis:** Massgeblich sind die im **Unterricht** und auf **Moodle** kommunizierten Anforderungen.
-
-<!-- WICHTIG: DIE KAPITELSTRUKTUR DARF NICHT VERÄNDERT WERDEN! -->
-
-<!-- Diese Vorlage ist für eine README.md im Repository gedacht. Abschnitte mit [Optional] können weggelassen werden, wenn in den Übungen nichts anderes verlangt wird. -->
+---
 
 ## 1. Ausgangslage
-Kurz beschreiben, welches Problem adressiert wird und welches Ergebnis angestrebt ist. Wem nützt die Lösung, wer ist beteiligt oder betroffen?
-- **Problem:** _[Das Problem ist identifiziert, verständlich beschrieben und optional mit Beispielen illustriert]_  
-- **Ziele:** _[stichwortartig oder einige Sätze]_  
-- **Primäre Zielgruppe:** _[kurz beschreiben]_  
-- **Weitere Stakeholder [Optional]:** _[z. B. Verwaltung, Geschäftsleitung]_  
-
+- **Problem:** Triathleten konzentrieren sich im Training oft rein auf physische Metriken wie Distanz, Herzfrequenz und Uhrzeit. Die mentale Verfassung, das Stresslevel und das subjektive Schmerzempfinden werden im Trainingsalltag vernachlässigt. Diese Disbalance gefährdet langfristig die Gesundheit, begünstigt Übertraining und blockiert den sportlichen Erfolg.
+- **Ziele:** Entwicklung eines interaktiven Multi-Sport-Logbuchs, das physische Leistungsdaten (Dauer, Distanz, Kalorien) nahtlos mit einem "Mental-Strength-Log" verknüpft, um Zusammenhänge zwischen Psyche und Leistung aufzuzeigen.
+- **Primäre Zielgruppe:** Ambitionierte Triathleten (Schwimmen, Radfahren, Laufen), die eine ganzheitliche Übersicht über ihre physische und psychische Belastung suchen.
 
 ## 2. Lösungsidee
-Beschreibt die Lösungsidee.
-- **Kernfunktionalität:** _[Workflows kurz nennen und optional illustrieren]_  
-- **Annahmen [Optional]:** _[welche Hypothesen werden geprüft?]_
-- **Abgrenzung [Optional]:** _[Was gehört explizit nicht zum Umfang?]_
+- **Kernfunktionalität:**
+  * Erfassung von Trainingseinheiten via interaktivem Echtzeit-Formular (Sportart, Distanz, Dauer).
+  * Integriertes Tracking der psychischen Verfassung (Mental Score) und des Fokus-Levels.
+  * Zentrales Dashboard zur Visualisierung physischer Statistiken gepaart mit mentalen Trends.
+  * Historische Übersicht zur Reflexion vergangener Belastungsphasen.
 
 ## 3. Vorgehen & Artefakte
-Die Durchführung erfolgt phasenbasiert; dokumentieren Sie die wichtigsten Ergebnisse je Phase.
 
 ### 3.1 Understand & Define
-- **Zielgruppenverständnis:** _[Problemraumanalyse, Recherche, (Proto-)Personas]_
-- **Wesentliche Erkenntnisse:** _[Stichpunkte]_
+- **Wesentliche Erkenntnisse:** Es fehlt am Markt ein zugängliches Tool, das physische Leistung und psychische Belastbarkeit einfach miteinander verknüpft, ohne den User nach dem Sport mit komplexen medizinischen Fragebögen zu überlasten.
+- **How-Might-We-Frage:** Wie könnten wir Triathleten helfen, den Zusammenhang zwischen ihrer mentalen Stärke und ihrem physischen Training im Alltag unkompliziert sichtbar zu machen?
 
 ### 3.2 Sketch
-- **Variantenüberblick:** _[kurz]_
-- **Skizzen:** _[Mehrere Varianten; Unterschiede kurz dokumentieren.]_
+- **Variantenüberblick:** Erstellung von 8 Konzeptvarianten für das zentrale Log-Feature mittels der *Crazy 8s* Methodik.
+- **Skizzen:** Der Fokus lag auf unterschiedlichen Interaktionsansätzen wie einem "Kalender-Fokus", einem schnellen "Emoji-Tagebuch" oder einer geführten "Chat-Eingabe".
 
 ### 3.3 Decide
-- **Gewählte Variante & Begründung:** _[Entscheidkriterien nennen]_  
-- **End-to-End-Ablauf:** _[Beschreibung inkl. User Journey Map]_  
-- **Mockup:** _[URL, z. B. Figma; Screenshots mit kurzen Beschreibungen]_  
+- **Gewählte Variante & Begründung:** Eine Kombination aus einer strukturierten Kalenderansicht für historische Daten und einem zentralen, direkt geladenen Dashboard. Diese Kombination bietet die beste zeitliche Übersicht bei gleichzeitig schneller visueller Rückmeldung über den aktuellen Zustand.
+- **Mockup:** Erstellt in Figma unter konsequenter Einhaltung eines *Mobile-First-Ansatzes*, da Triathleten ihre Einheiten oft unmittelbar nach dem Training noch unterwegs oder in der Umkleidekabine loggen möchten.
 
 ### 3.4 Prototype
 
 #### 3.4.1. Entwurf (Design)
-3.4.1 Globales Layout und Navigation (+layout.svelte)
-Das Layout bildet das funktionale Gerüst der Applikation TriBalance. Es wurde nach dem Desktop-First-Prinzip entwickelt, bietet jedoch durch reaktive CSS-Klassen eine vollständige mobile Adaption.
-
-Architektur: Nutzung des SvelteKit-Layout-Systems, um eine persistente Navigation über alle Unterseiten hinweg zu gewährleisten.
-
-Sidebar-Logik: Auf Viewports > 1024px ist eine 280px breite Sidebar fixiert. Dies minimiert die kognitive Last, da die Navigationselemente (Dashboard, Training, Profil) stets sichtbar sind.
-
-Mobile Adaption: Über Tailwind Media-Queries bricht die Sidebar auf kleineren Bildschirmen in einen Bottom-Drawer um. Dies entspricht dem "Thumb-Zone"-Design, um die Einhandbedienung auf Smartphones zu erleichtern.
-
-Floating Action Button (FAB): Ein zentraler "+" Button dient als primärer Call-to-Action (CTA), um den "Interaction Cost" für die Erfassung neuer Trainings so gering wie möglich zu halten.
-Beschreibt die Gestaltung und Interaktion.
-> **Hinweis:** Hier wird der **Prototyp** beschrieben, nicht das **Mockup**.
-- **Informationsarchitektur:** _[z. B. Seiten/Navigation: Konzept, nicht die technische Umsetzung]_
-- **User Interface Design:** _[wichtige Screens: Screenshots mit kurzen Erläuterungen]_  
-- **Designentscheidungen:** _[zentrale Entscheidungen und Begründungen]_
+- **Informationsarchitektur:** Um eine klare Trennung zwischen Datenerfassung und Datenvisualisierung zu schaffen, wurde das ursprüngliche Single-Page-Design in ein Multi-Route-System überführt:
+  * `/trainings` (Write): Dedizierte Route für die Trainingserfassung via Echtzeit-Tracker.
+  * `/dashboard` (Read): Zentrale Übersicht, die historische Einträge aggregiert darstellt.
+- **Globales Layout und Navigation (`+layout.svelte`):** Das Layout bildet das funktionale Gerüst der Applikation. Es wurde primär nach Desktop-First-Prinzipien entwickelt, bietet jedoch durch reaktive CSS-Klassen eine vollständige mobile Adaption. 
+- **Designentscheidungen:** * **Sidebar-Logik:** Auf Viewports > 1024px ist eine 280px breite Sidebar fixiert. Dies minimiert die kognitive Last, da Navigationselemente stets sichtbar sind.
+  * **Mobile Adaption:** Über Tailwind Media-Queries bricht die Sidebar auf Smartphones in einen Bottom-Drawer um (*Thumb-Zone*-Design), was die Einhandbedienung erleichtert.
+  * **Floating Action Button (FAB):** Ein zentraler "+"-Button dient auf Mobilgeräten als primärer Call-to-Action (CTA), um die Interaktionskosten beim Starten eines Trainings zu minimieren.
+  * **Slider-Eingabe:** Nutzung eines numerischen Sliders (1-5) für den Mental-Fokus zur Senkung der Hürde bei der Dateneingabe.
 
 #### 3.4.2. Umsetzung (Technik)
-3.4.2 Die Tracker-Komponente (Tracker.svelte)
-Die Tracker-Komponente ist das technologische Herzstück des Prototyps. Sie kombiniert zeitliche Erfassung mit räumlicher Logik.
+- **Technologie-Stack:** SvelteKit (HTML/CSS/JavaScript), Tailwind CSS (Layout & Design), MongoDB (Datenbank-Persistenz via offiziellen `mongodb`-Treiber).
+- **Die Tracker-Komponente (`Tracker.svelte`):** Kombiniert zeitliche Erfassung mit räumlicher Logik.
+  * **Echtzeit-Stoppuhr:** Über ein `setInterval` implementiert, das die Dauer berechnet und über Svelte-Reaktivität sofort im UI spiegelt.
+  * **Geolocation & Haversine-Formel:** Zur Berechnung der zurückgelegten Distanz ohne externe API-Kosten nutzt die Komponente die native Web Geolocation API des Browsers. Die Distanz zwischen zwei GPS-Koordinatenpunkten wird über die Haversine-Formel berechnet:
+    $$d = 2r \arcsin\left(\sqrt{\sin^2\left(\frac{\phi_2-\phi_1}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\lambda_2-\lambda_1}{2}\right)}\right)$$
+  * **SSR-Sicherheit:** Da die `navigator.geolocation`-API im Server-Side-Rendering von SvelteKit nicht existiert, wurde die gesamte Sensor-Logik in den `onMount`-Lifecycle-Hook gekapselt, um Server-Abstürze zu verhindern.
+  * **Robustheit:** Ein eingebauter Glitch-Filter ignoriert fehlerhafte GPS-Sprünge, falls die Distanz zwischen zwei Messpunkten unrealistisch hoch ausfällt.
+- **Migration auf Svelte 5 (Runes):** Die Reaktivitäts-Logik wurde von Svelte 4 (`export let`, `$:`) vollständig auf die modernen Svelte 5 Runes (`$state`, `$derived`, `$props`) refactored. Dies führt zu einer performanteren Synchronisation zwischen den GPS-Sensordaten und der Benutzeroberfläche.
+- **Analytics & Datenfluss:** Daten werden von der `Tracker.svelte`-Komponente via Custom Events an das Page-Level-Formular (`+page.svelte`) übergeben. Von dort erfolgt die Übermittlung an die serverseitige Logik (`+page.server.js`) via SvelteKit Form Actions. Unter Integration der `calories.js` wird bei jedem Speichervorgang automatisch der energetische Aufwand basierend auf MET-Faktoren (Metabolic Equivalent of Task) berechnet.
 
-Echtzeit-Stoppuhr: Implementiert über ein setInterval, das die Dauer in Minuten berechnet und über Svelte-Reaktivität (duration) sofort im UI spiegelt.
+#### 🛠️ Technische Sanierung & Datenbank-Krimi (Bugfix-Dokumentation)
+Während der Entwicklung traten kritische Fehler bei der Anbindung der entfernten MongoDB Atlas Datenbank auf. Die Behebung wurde wie folgt dokumentiert:
 
-Geolocation & Haversine-Formel: Um die zurückgelegte Distanz ohne externe API-Kosten zu berechnen, nutzt die Komponente die native Web Geolocation API. Da die Erde keine Scheibe ist, wird für die Distanzberechnung zwischen zwei Koordinatenpunkten die Haversine-Formel verwendet:
-
-Diese berechnet den Großkreisabstand zwischen zwei Punkten auf einer Kugel.
-
-SSR-Sicherheit: Da die navigator.geolocation-API nur im Browser existiert, wurde die gesamte Abfrage-Logik in den onMount-Lifecycle-Hook gekapselt. Dies verhindert Abstürze während des Server-Side-Renderings (SSR) von SvelteKit.
-
-Daten-Synchronisation: Mittels eines EventDispatchers werden alle erfassten Daten (Distanz, Dauer, Mental-Score, Pain-Level) live an das übergeordnete Formular gemeldet, was eine nahtlose User Experience ermöglicht.
-Die Distanzberechnung erfolgt über die Haversine-Formel:
-$$d = 2r \arcsin\left(\sqrt{\sin^2\left(\frac{\phi_2-\phi_1}{2}\right) + \cos(\phi_1)\cos(\phi_2)\sin^2\left(\frac{\lambda_2-\lambda_1}{2}\right)}\right)$$
-
-Robustheit: Ein eingebauter Filter ignoriert GPS-Sprünge (Glitch-Filter), falls die berechnete Distanz zwischen zwei Messpunkten unrealistisch hoch ist.
-Fasst die technische Realisierung zusammen.
-
-Migration auf Svelte 5 (Runes):
-Während der Implementierung wurde die Reaktivitäts-Logik von Svelte 4 (export let, $:) auf die modernsten Svelte 5 Runes ($state, $derived, $props) migriert. Dies stellt sicher, dass der Prototyp die aktuellste Reaktivitäts-Engine nutzt, was zu einer performanteren Synchronisation zwischen den GPS-Sensordaten und der Benutzeroberfläche führt.
-
-Architektur-Refactoring & Routing
-Im Zuge der Qualitätssicherung wurde die Architektur von einem globalen Drawer-Modell auf ein dediziertes Routing-Modell umgestellt:
-
-Trennung der Zuständigkeiten (Separation of Concerns): Der Tracker wurde aus dem globalen Layout in eine eigene Route (/trainings) verschoben. Dies vereinfacht die Wartbarkeit und ermöglicht eine saubere Anbindung an die SvelteKit Form Actions.
-
-Datenfluss: Die Daten werden von der Tracker.svelte-Komponente via Custom Events an das Page-Level-Formular (+page.svelte) übergeben. Von dort erfolgt die Übermittlung an die serverseitige Logik (+page.server.js), welche die Validierung und Persistierung in der MongoDB übernimmt.
-
-Analytics-Erweiterung: Durch die Integration der calories.js wird bei jedem Speichervorgang automatisch der energetische Aufwand basierend auf den MET-Faktoren (Metabolic Equivalent of Task) berechnet und als zusätzlicher Datenpunkt gespeichert.
-
-Implementierung des Routing-Konzepts
-"Um eine klare Trennung zwischen der Datenerfassung und der Datenvisualisierung zu schaffen, wurde das ursprüngliche Single-Page-Design in ein Multi-Route-System überführt:
-
-/trainings (Write): Dedizierte Route für die Trainingserfassung. Hier wird die Tracker-Komponente genutzt, um via SvelteKit Form Actions Daten asynchron an die MongoDB zu senden.
-
-/dashboard (Read): Zentrale Übersicht, die beim Laden der Seite (+page.server.js) alle Einträge aus der Datenbank abruft. Durch die Integration der calories.js-Logik werden die Rohdaten (Dauer/Sportart) in Echtzeit in verbrannte Kalorien umgerechnet und visualisiert.
-
-Status-Indikatoren: Einträge mit einem Schmerzniveau (Pain-Level) über 7 werden im Dashboard automatisch optisch hervorgehoben, um auf potenzielle Überlastungen hinzuweisen."
-
-- **Technologie-Stack:** _[SvelteKit, Bibliotheken falls genutzt]_
-- **Tooling:** _[IDE/Erweiterungen, lokale/Cloud-Tools; den Einsatz von KI beschreiben Sie im Kapitel **KI-Deklaration**]_  
-- **Struktur & Komponenten:** _[Seiten, Routen, State/Stores, wichtige Komponenten]_
-- **Daten & Schnittstellen:** _[Wie werden Daten gespeichert, verwaltet, abgerufen?]_
-- **Deployment:** _[URL]_  
-- **Besondere Entscheidungen:** _[z. B. Trade-offs, Vereinfachungen]_  
+1. **Stabilität der Umgebungsvariablen (`src/lib/server/db.js`):**
+   * *Problem:* SvelteKit verlor beim Hot-Reloading im Entwicklungsmodus temporär die statische Verbindung zur `.env`-Datei. Dies führte zu `undefined`-Fehlern (`startsWith`) beim Initialisieren des `MongoClient`.
+   * *Lösung:* Umstellung vom statischen Import auf das dynamische private SvelteKit-Modul (`import { env } from '$env/dynamic/private'`), um die URI zur Laufzeit jederzeit sicher auszulesen.
+2. **Netzwerk- & DNS-Blockaden im Hochschulnetz:**
+   * *Problem:* Restriktive Firewalls im Uni-WLAN blockierten die modernen MongoDB `mongodb+srv://` DNS-SRV-Abfragen. Dies führte lokal reproduzierbar zu `ECONNREFUSED`-Verbindungsabbrüchen.
+   * *Lösung:* Modifikation der Verbindungs-URI in der `.env` auf den direkten, dedizierten Shard-Cluster-Verbindungsweg über Port `27017`. Dies umgeht den gesperrten DNS-SRV-Lookup vollständig.
+3. **Authentifizierung & URL-Konformität:**
+   * *Problem:* Ein Sonderzeichen (`!`) im Datenbank-Passwort führte zu einem Parsing-Fehler innerhalb der Verbindungs-URL. Zudem besaß der Standard-Datenbank-User unzureichende Privilegien, was in einem `MongoServerError: bad auth : authentication failed` resultierte.
+   * *Lösung:* Erstellung eines neuen, dedizierten Datenbank-Nutzers (`joel`) ohne URL-kritische Sonderzeichen in MongoDB Atlas, ausgestattet mit der expliziten Rolle `Read and write to any database`.
+   * **Erweiterung der Datenerfassung (17. Mai 2026):**
+  * Implementierung einer serverseitigen SvelteKit Form Action (`src/routes/trainings/+page.server.js`), welche die Formulardaten asynchron via `use:enhance` entgegennimmt.
+  * Integration einer strikten serverseitigen Typ-Validierung (Konvertierung von Strings in numerische `Number`-Typen für Distanz, Dauer, Pain-Level und Mental-Score).
+  * Erfolgreiche Verknüpfung mit der exportierten `trainings`-Collection aus `db.js` zur persistenten Speicherung in MongoDB Atlas sowie automatische Weiterleitung (`redirect`) auf die `/statistiken`-Route nach erfolgreichem Write-In.
 
 ### 3.5 Validate
-- **URL der getesteten Version** (separat deployt)
-- **Ziele der Prüfung:** _[welche Fragen sollen beantwortet werden?]_  
-- **Vorgehen:** _[moderiert/unmoderiert; remote/on-site]_  
-- **Stichprobe:** _[Mit wem wurde getestet? Profil; Anzahl]_  
-- **Aufgaben/Szenarien:** _[Ausformulierte Testaufgaben]_  
-- **Kennzahlen & Beobachtungen:** _[z. B. Erfolgsquote, Zeitbedarf, qualitative Findings]_  
-- **Zusammenfassung der Resultate:** _[Wichtigste Erkenntnisse; 2-4 Sätze]_  
-- **Abgeleitete Verbesserungen:** _[Anforderungen, die als nächstes umgesetzt werden sollten, priorisiert, kurz begründet; falls Verbesserungen im Prototyp konkret umgesetzt wurden: In Kap. 4 dokumentieren]_  
+- **Ziele der Prüfung:** Testen, ob Triathleten das Koppeln von physischer Dauer und dem subjektiven Mental-Score intuitiv verstehen und ob das UI während der Bewegung (Tracking) fehlerfrei bedienbar bleibt.
+- **Zusammenfassung der Resultate:** Der Prototyp verhält sich in der Datenerfassung stabil. Das Erfassen über Slider verringert die Eingabehürde nach dem Training signifikant.
 
-## 4. Erweiterungen [Optional]
-Warnsystem (Mental & Physisch)
-Pain-Level-Monitoring: Die App visualisiert Belastungen über ein Schwellenwert-System. Werte über 7 (auf einer Skala von 0-10) triggern eine visuelle Warnung. Dies dient der Verletzungsprävention und ist ein Alleinstellungsmerkmal gegenüber Standard-Lauf-Apps.
-Dokumentiert Erweiterungen über den Mindestumfang hinaus.
-> **Hinweis:** Jede Erweiterung ist separat nach dem folgenden Schema zu beschreiben.
+## 4. Erweiterungen
+### 4.1 Automatisches Warnsystem (Mental & Physisch)
+- **Beschreibung & Nutzen:** Um Verletzungen und Übertraining aktiv vorzubeugen, visualisiert die App kritische Belastungen über ein Schwellenwert-System. Ein subjektives Schmerzniveau (Pain-Level) von über 7 triggert im Dashboard automatisch eine optische Hervorhebung (Warnung).
+- **Wo umgesetzt:** Im Frontend (`/dashboard`) via bedingtem CSS-Klassen-Rendering, basierend auf den aus der MongoDB abgerufenen Datensätzen.
 
-### _[4.x Kurzbeschreibung / Titel]_  
-- **Beschreibung & Nutzen:** _[Was wurde erweitert? Warum?]_  
-- **Wo umgesetzt:** _[Wie und wo wurde es gemacht? Frontend, Backend, Datenbank?]_  
-- **Referenz:** _[Wo wird die Erweiterung auch noch beschrieben, z.B. Screenshot oder Beschreibung in einem anderen Kapitel]_  
-- **Aus Evaluation abgeleitet?:** _[Wurde diese Erweiterung als Folge eines in der Evaluation identifizierten Issues implementiert?]_  
-
-> Das folgende **Beispiel** wurde bewusst kurz gehalten. Erweiterungen dürfen auch ausführlicher beschrieben werden.
-
-### 4.1 Tabelle nach Kategorien filtern
-- **Beschreibung & Nutzen:** Tabelle X kann nach Kategorie gefiltert werden, weil User typischerweise nur an einer bestimmten Kategorie interessiert sind.  
-- **Wo umgesetzt:** 
-  - **Frontend:** Tabelle mit Dropdown in Datei ...
-  - **Backend:** Form Action ... in Datei ...
-  - **Datenbank:** MongoDB-Query in Datei ...
-- **Referenz:** Screenshot in Kap. x.y
-- **Aus Evaluation abgeleitet?:** Ja, Issue x.y
-
-## 5. Projektorganisation [Optional]
-Beispiele:
-- **Repository & Struktur:** _[Link; kurze Strukturübersicht]_  
-- **Issue-Management:** _[Vorgehen kurz beschreiben]_  
-- **Commit-Praxis:** _[z. B. sprechende Commits]_
+## 5. Projektorganisation
+- **Repository & Struktur:** Verwendung einer klaren SvelteKit-Ordnerstruktur (`src/routes/` für das routingbasierte System, `src/lib/components/` für wiederverwendbare UI-Elemente wie den Tracker).
+- **Commit-Praxis:** Nutzung von sprechenden, feingranularen Git-Commits (z. B. `feat:`, `fix:`, `docs:`), um die Entwicklungsschritte sauber nachvollziehbar zu halten.
 
 ## 6. KI-Deklaration
-Die folgende Deklaration ist verpflichtend und beschreibt den Einsatz von KI im Projekt.
 
 ### 6.1 KI-Tools
-- **Eingesetzte Tools**: _[z. B. Copilot, ChatGPT, Claude, lokale Modelle; Version/Variante wenn bekannt]_
-- **Zweck & Umfang**: _[wie, wofür und in welchem Ausmass wurde KI eingesetzt (z. B. Textentwürfe, Codevorschläge, Tests, Refactoring); welche Teile stammen (ganz/teilweise) aus KI-Unterstützung?]_
-- **Eigene Leistung (Abgrenzung):** _[was ist eigenständig erarbeitet/überarbeitet worden?]_
+- **Eingesetzte Tools:** GitHub Copilot (In-Editor Code-Generierung) und Gemini (Architekturberatung, strukturierte Fehlerdiagnose und Prompt-Konzeptionierung).
+- **Zweck & Umfang:** KI wurde maßgeblich zur Erstellung des technischen Grundgerüsts der Svelte-Komponenten verwendet. Besonders intensiv wurde Gemini bei der Tiefenanalyse der MongoDB-Verbindungsfehler (`ECONNREFUSED` / `Topology is closed`) eingesetzt, um die zugrundeliegenden DNS- und Netzwerkarchitektur-Probleme zu entschlüsseln.
+- **Eigene Leistung:** Konzeption der User Experience, visuelles Design mittels Tailwind CSS, das gesamte manuelle Refactoring der Reaktivität auf Svelte 5 Runes, das Einrichten des MongoDB Atlas Clusters sowie die finale Verantwortung und Validierung des gesamten Codes.
 
 ### 6.2 Prompt-Vorgehen
-_[Überlegungen zu Prompt-Vorgehen, Qualität und Urheberrecht/Quellen. Wie wurde beim Prompting vorgegangen? Zu beschreiben ist die grundlegende Vorgehensweise. Einzelne, konkrete Prompts sollten höchstens als Beispiele aufgeführt werden. ]_
+Es wurde ein systematisches, kontextbasiertes Prompting angewendet. Statt unstrukturiertem Code-Kopieren wurden Fehlermeldungen aus dem VS Code Terminal per Screenshot und Text an die KI übergeben, um die genauen Ursachen (z. B. DNS-SRV-Sperren oder Sonderzeichen-Parsing) zu isolieren. Für die Weiterarbeit mit GitHub Copilot wurde ein strukturierter Master-Prompt entwickelt, der Code-Kontext, Technologie-Vorgaben (Svelte 5 Runes) und funktionale Ziele präzise definiert.
 
 ### 6.3 Reflexion
-_[Nutzen, Grenzen, Risiken/Qualitätssicherung, ...]_
-
-## 7. Anhang [Optional]
-Beispiele:
-- **Quellen:** _[verwendete Vorlagen/Assets/Modelle; Lizenz/Urheberrecht; ...]_
-- **Testskript & Materialien:** _[Link/Datei]_  
-- **Rohdaten/Auswertung:** _[Link/Datei]_  
-
+Der Einsatz von KI beschleunigte das Aufsetzen des Projekts enorm. Die Grenzen zeigten sich jedoch bei Versionsüberschneidungen (Svelte 4 vs. Svelte 5 Runes), wo KI-Generate oft veraltete Syntax lieferten und manuell korrigiert werden mussten. Bei der Netzwerk-Fehlersuche erwies sich der Dialog mit der KI als exzellenter "Sparringspartner", um komplexe Server-Infrastrukturprobleme Schritt für Schritt logisch einzugrenzen.
