@@ -85,6 +85,16 @@ Während der Entwicklung traten kritische Fehler bei der Anbindung der entfernte
   * Integration einer strikten serverseitigen Typ-Validierung (Konvertierung von Strings in numerische `Number`-Typen für Distanz, Dauer, Pain-Level und Mental-Score).
   * Erfolgreiche Verknüpfung mit der exportierten `trainings`-Collection aus `db.js` zur persistenten Speicherung in MongoDB Atlas sowie automatische Weiterleitung (`redirect`) auf die `/statistiken`-Route nach erfolgreichem Write-In.
 
+  System-Stabilisierung & Authentifizierung:
+
+Daten-Serialisierung: Korrektur des Serialisierungsfehlers auf der Statistik-Seite durch explizite Typ-Umwandlung von ObjectId zu String in +page.server.js.
+
+Authentifizierungs-Layer: Implementierung eines sessionbasierten Auth-Systems mittels cookies.set und serverseitigen Redirects. Schutz der Routen (/trainings, /statistiken) durch Middleware-Session-Validierung.
+
+Mandantentrennung: Umstellung der Datenbank-Abfragen auf eine explizite userId-Filterung (find({ userId: sessionId })), um sicherzustellen, dass Benutzer ausschließlich ihre eigenen, persönlichen Trainingsdaten einsehen können.
+
+Layout-Modernisierung: Abschluss des Refactorings auf Svelte 5 ($props), Beseitigung von legacy_export_invalid-Konflikten im +layout.svelte und finale Konfiguration der Navigation inklusive dynamischem Login/Logout-Status.
+
 ### 3.5 Validate
 - **Ziele der Prüfung:** Testen, ob Triathleten das Koppeln von physischer Dauer und dem subjektiven Mental-Score intuitiv verstehen und ob das UI während der Bewegung (Tracking) fehlerfrei bedienbar bleibt.
 - **Zusammenfassung der Resultate:** Der Prototyp verhält sich in der Datenerfassung stabil. Das Erfassen über Slider verringert die Eingabehürde nach dem Training signifikant.
@@ -110,3 +120,4 @@ Es wurde ein systematisches, kontextbasiertes Prompting angewendet. Statt unstru
 
 ### 6.3 Reflexion
 Der Einsatz von KI beschleunigte das Aufsetzen des Projekts enorm. Die Grenzen zeigten sich jedoch bei Versionsüberschneidungen (Svelte 4 vs. Svelte 5 Runes), wo KI-Generate oft veraltete Syntax lieferten und manuell korrigiert werden mussten. Bei der Netzwerk-Fehlersuche erwies sich der Dialog mit der KI als exzellenter "Sparringspartner", um komplexe Server-Infrastrukturprobleme Schritt für Schritt logisch einzugrenzen.
+Erweiterung: In der finalen Phase wurde die KI intensiv zur Lösung von Svelte-5-Reaktivitätskonflikten sowie zur Implementierung der sessionbasierten Authentifizierung hinzugezogen. Der Fokus lag hierbei auf der korrekten Abbildung des serverseitigen Auth-Flows innerhalb der SvelteKit-Struktur, um Datenlecks bei der mandantenübergreifenden Ansicht zu verhindern.

@@ -18,8 +18,12 @@
 	}
 </script>
 
-<div class="p-8 max-w-xl mx-auto">
-	<div class="card p-6 variant-glass-surface">
+<div class="p-4 sm:p-8 max-w-xl mx-auto">
+	<div class="card p-4 sm:p-6 variant-glass-surface space-y-6">
+		<div class="space-y-3">
+			<h1 class="h2">Neues Training</h1>
+			<p class="text-surface-600">Verwende den Tracker, um dein Training direkt mobil zu protokollieren.</p>
+		</div>
 		<Tracker on:input={handleInput} />
 
 		{#if form?.errors}
@@ -58,12 +62,11 @@
 					if (result.type === 'failure' || result.type === 'error') {
 						form = result.data;
 					} else if (result.type === 'redirect') {
-						// Die automatische Weiterleitung zur /statistiken Seite erfolgt hier
 						form = null;
 					}
 				};
 			}}
-			class="mt-6"
+			class="space-y-4"
 		>
 			<input type="hidden" name="sport" value={trackerData.sport} />
 			<input type="hidden" name="distance" value={trackerData.distance} />
@@ -74,7 +77,7 @@
 			<button
 				type="submit"
 				disabled={isSubmitting}
-				class="btn variant-filled-primary w-full"
+				class="btn variant-filled-primary w-full min-h-[48px] text-base"
 			>
 				{isSubmitting ? 'Wird gespeichert...' : 'Training speichern'}
 			</button>

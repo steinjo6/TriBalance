@@ -1,8 +1,22 @@
 import { trainings } from '$lib/server/db.js';
 import { fail, redirect } from '@sveltejs/kit';
 
+export async function load({ locals, cookies }) {
+	const userId = locals.user?.id || cookies.get('session');
+	if (!userId) {
+		throw redirect(303, '/login');
+	}
+
+	return { userId };
+}
+
 export const actions = {
-	create: async ({ request }) => {
+	create: async ({ request, locals, cookies }) => {
+		const userId = locals.user?.id || cookies.get('session');
+		if (!userId) {
+			throw redirect(303, '/login');
+		}
+
 		// 1. FormData aus dem Request extrahieren
 		const formData = await request.formData();
 
@@ -60,6 +74,7 @@ export const actions = {
 			duration: durationNum,
 			painLevel: painLevelNum,
 			mentalScore: mentalScoreNum,
+			userId,
 			createdAt: new Date(),
 			updatedAt: new Date()
 		};
