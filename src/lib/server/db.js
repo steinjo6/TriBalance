@@ -29,6 +29,23 @@ export async function connectDB() {
 // Zugriff auf die Datenbank (Standardname: 'tribalance')
 const db = client.db('tribalance');
 
+// Standardwerte für User-Dokumente in MongoDB
+export const userDefaults = {
+    isVerified: false,
+    verificationToken: null
+};
+
+// User-Dokument-Shape:
+// {
+//   username: string,
+//   passwordHash: string,
+//   name: string,
+//   birthdate: string,
+//   isVerified: boolean,
+//   verificationToken: string | null,
+//   createdAt: Date
+// }
+
 // Exportiere die Collections, damit du sie in deinen Form Actions nutzen kannst
 export const users = db.collection('users');
 export const trainings = db.collection('trainings');

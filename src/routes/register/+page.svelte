@@ -12,7 +12,14 @@
 			<p class="text-surface-600">Erstelle dein Konto und erlebe den vollständigen Bestätigungs-Flow.</p>
 		</div>
 
-		{#if form?.requireVerification}
+		{#if form?.verificationSent}
+			<div class="alert variant-filled-primary">
+				<div class="alert-title">E-Mail-Verifizierung gesendet</div>
+				<div class="alert-message">
+					Der Verifizierungslink wurde in der Server-Konsole ausgegeben. Bitte öffne ihn, um deine E-Mail zu bestätigen.
+				</div>
+			</div>
+		{:else if form?.requireVerification}
 			<div class="alert variant-filled-primary">
 				<div class="alert-title">Bestätigung erforderlich</div>
 				<div class="alert-message">
@@ -60,6 +67,7 @@
 						{#if form.errors.username}<p>❌ {form.errors.username}</p>{/if}
 						{#if form.errors.password}<p>❌ {form.errors.password}</p>{/if}
 						{#if form.errors.name}<p>❌ {form.errors.name}</p>{/if}
+						{#if form.errors.email}<p>❌ {form.errors.email}</p>{/if}
 						{#if form.errors.birthdate}<p>❌ {form.errors.birthdate}</p>{/if}
 						{#if form.errors.general}<p>❌ {form.errors.general}</p>{/if}
 					</div>
@@ -73,9 +81,7 @@
 					isSubmitting = true;
 					return async ({ result }) => {
 						isSubmitting = false;
-						if (result.type === 'failure' || result.type === 'error') {
-							form = result.data;
-						}
+						form = result.data;
 					};
 				}}
 				class="space-y-4"
@@ -93,6 +99,11 @@
 				<label class="field">
 					<span class="small">Voller Name</span>
 					<input type="text" name="name" autocomplete="name" value={form?.data?.name ?? ''} required class="w-full min-h-[44px]" />
+				</label>
+
+				<label class="field">
+					<span class="small">E-Mail-Adresse</span>
+					<input type="email" name="email" autocomplete="email" value={form?.data?.email ?? ''} required class="w-full min-h-[44px]" />
 				</label>
 
 				<label class="field">

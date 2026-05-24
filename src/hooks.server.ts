@@ -1,28 +1,41 @@
 import type { Handle } from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import { users } from '$lib/server/db.js';
+import { ObjectId } from 'mongodb';
 
-// Diese Routen dürfen NIEMALS blockiert werden, sonst stürzt das Login-Formular ab
-const publicRoutes = ['/login', '/register'];
+const publicRoutes = ['/login', '/register', '/verify']; // '/verify' muss öffentlich sein!
 
 export const handle: Handle = async ({ event, resolve }) => {
     const sessionId = event.cookies.get('session');
-    const pathname = event.url.pathname;
-
+    
+    // 1. Session-Check: User aus DB laden, um 'isVerified' zu prüfen
     if (sessionId) {
-        event.locals.user = { id: sessionId };
+        try {
+            const user = await users.findOne({ _id: new ObjectId(sessionId) });
+            if (user) {
+                // Nur wenn verifiziert, setzen wir locals.user
+                if (user.isVerified) {
+                    event.locals.user = { id: user._id.toString(), username: user.username };
+                } else {
+                    // Falls nicht verifiziert, Session löschen
+                    event.cookies.delete('session', { path: '/' });
+                }
+            }
+        } catch (e) {
+            // Falls ID ungültig, einfach weiter
+        }
     }
 
-    // Prüfen, ob es sich um eine statische Datei oder interne SvelteKit-Assets handelt
-    const isAsset = pathname.startsWith('/_app') || pathname.startsWith('/favicon.svg');
+    const pathname = event.url.pathname;
     const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
-    // WICHTIGER FIX: Wenn keine Session da ist und wir NICHT auf einer öffentlichen Seite oder einem Asset sind
-    if (!sessionId && !isPublicRoute && !isAsset && pathname !== '/') {
+    // 2. Zugriffsschutz: Nur wenn KEIN verifizierter User da ist, wird man ausgesperrt
+    if (!event.locals.user && !isPublicRoute && pathname !== '/') {
         throw redirect(303, '/login');
     }
 
-    // Zusatz-Komfort: Wenn man eingeloggt ist, macht es keinen Sinn, das Login-Formular zu sehen
-    if (sessionId && isPublicRoute) {
+    // 3. Komfort-Check: Wenn eingeloggt und auf /login, dann ab zum Dashboard
+    if (event.locals.user && isPublicRoute) {
         throw redirect(303, '/dashboard');
     }
 
