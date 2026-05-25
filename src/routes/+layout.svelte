@@ -29,15 +29,24 @@
     }
     .menu-item:hover { background: rgba(255, 255, 255, 0.1); color: #06b6d4; }
     
-    /* Mobile Nav */
+    /* Mobile Nav Styles */
+    .mobile-nav { display: none; } /* Standardmäßig auf Desktop aus */
+
     @media(max-width: 639px) {
         .sidebar { display: none; }
-        .main { padding-bottom: 5rem; }
+        .main { padding: 1rem; padding-bottom: 5rem; } /* Mehr Abstand unten, damit Inhalt nicht verdeckt wird */
+        
         .mobile-nav { 
             display: flex; position: fixed; left: 0; right: 0; bottom: 0; 
             background: #0f172a; z-index: 45; padding: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            justify-content: space-around;
         }
-        .mobile-nav-link { flex: 1; color: white; text-align: center; text-decoration: none; padding: 0.5rem; }
+        .mobile-nav-link { 
+            flex: 1; color: white; text-align: center; text-decoration: none; 
+            padding: 0.75rem 0.5rem; font-size: 0.9rem; border-radius: 6px;
+        }
+        .mobile-nav-link:hover { color: #06b6d4; background: rgba(255, 255, 255, 0.05); }
     }
 </style>
 
@@ -61,4 +70,13 @@
     <main class="main">
         {@render children()}
     </main>
+
+    {#if data?.user}
+        <nav class="mobile-nav">
+            <a href="/dashboard" class="mobile-nav-link">Dashboard</a>
+            <a href="/trainings" class="mobile-nav-link">Trainings</a>
+            <a href="/statistiken" class="mobile-nav-link">Statistiken</a>
+            <a href="/logout" class="mobile-nav-link" style="color:#f87171;">Ausloggen</a>
+        </nav>
+    {/if}
 </div>

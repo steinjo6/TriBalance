@@ -22,9 +22,14 @@ export const actions = {
 
 		const sport = formData.get('sport');
 		const distance = formData.get('distance');
+		// duration can be provided as minutes ('duration') or as exact seconds ('durationSeconds') for live-tracking
 		const duration = formData.get('duration');
-		const painLevel = formData.get('painLevel');
-		const mentalScore = formData.get('mentalScore');
+		const durationSeconds = formData.get('durationSeconds');
+		const datetime = formData.get('datetime');
+		const notes = formData.get('notes');
+		// pain/mental optional; fall back to sensible defaults when not provided
+		const painLevel = formData.get('painLevel') ?? '0';
+		const mentalScore = formData.get('mentalScore') ?? '3';
 
 		// 2. Validierung mit detaillierten Fehlerprüfungen
 		const errors = {};
@@ -35,27 +40,54 @@ export const actions = {
 		}
 
 		// Distanz validieren
-		const distanceNum = parseFloat(distance);
+		const distanceNum = parseFloat(distance || '0');
 		if (isNaN(distanceNum) || distanceNum < 0) {
 			errors.distance = 'Distanz muss eine positive Zahl sein';
 		}
 
-		// Dauer validieren
-		const durationNum = parseInt(duration, 10);
-		if (isNaN(durationNum) || durationNum < 1) {
-			errors.duration = 'Dauer muss mindestens 1 Minute sein';
+		// Dauer validieren: entweder duration (Minuten) oder durationSeconds
+		const durationMinutesNum = duration ? parseInt(duration, 10) : NaN;
+		const durationSecondsNumRaw = durationSeconds ? parseInt(durationSeconds, 10) : NaN;
+		let durationSecondsNum = null;
+		let durationFinalMinutes = null;
+
+		if (!isNaN(durationSecondsNumRaw)) {
+			durationSecondsNum = durationSecondsNumRaw;
+			durationFinalMinutes = Math.max(1, Math.ceil(durationSecondsNum / 60));
+		} else if (!isNaN(durationMinutesNum)) {
+			durationFinalMinutes = durationMinutesNum;
+			durationSecondsNum = durationFinalMinutes * 60;
+		} else {
+			errors.duration = 'Dauer muss angegeben werden (Minuten oder exakte Sekunden)';
 		}
 
-		// Pain Level validieren (0-10)
+		if (durationSecondsNum !== null && durationSecondsNum < 10) {
+			errors.duration = 'Dauer muss mindestens 10 Sekunden betragen';
+		}
+
+		// Pain Level validieren (0-10) — optional
 		const painLevelNum = parseInt(painLevel, 10);
 		if (isNaN(painLevelNum) || painLevelNum < 0 || painLevelNum > 10) {
 			errors.painLevel = 'Pain Level muss zwischen 0 und 10 liegen';
 		}
 
-		// Mental Score validieren (1-5)
+		// Mental Score validieren (1-5) — optional
 		const mentalScoreNum = parseInt(mentalScore, 10);
 		if (isNaN(mentalScoreNum) || mentalScoreNum < 1 || mentalScoreNum > 5) {
 			errors.mentalScore = 'Mental Score muss zwischen 1 und 5 liegen';
+		}
+
+		// Datum validieren (wenn angegeben muss es in der Vergangenheit liegen)
+		let createdAt = new Date();
+		if (datetime) {
+			const parsed = new Date(datetime);
+			if (isNaN(parsed.getTime())) {
+				errors.datetime = 'Ungültiges Datum';
+			} else if (parsed.getTime() > Date.now()) {
+				errors.datetime = 'Datum darf nicht in der Zukunft liegen';
+			} else {
+				createdAt = parsed;
+			}
 		}
 
 		// Falls Fehler: Rückgabe mit fail()
@@ -71,11 +103,14 @@ export const actions = {
 		const trainingRecord = {
 			sport: sport.trim(),
 			distance: distanceNum,
-			duration: durationNum,
+			// store both seconds (exact) and minutes (rounded/used elsewhere)
+			durationSeconds: durationSecondsNum,
+			duration: durationFinalMinutes,
 			painLevel: painLevelNum,
 			mentalScore: mentalScoreNum,
+			notes: notes || '',
 			userId,
-			createdAt: new Date(),
+			createdAt,
 			updatedAt: new Date()
 		};
 
