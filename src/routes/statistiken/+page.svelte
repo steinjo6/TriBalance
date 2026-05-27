@@ -1,6 +1,6 @@
 <script lang="ts">
     // src/routes/statistiken/+page.svelte
-    
+
     // Svelte 5 nimmt Daten über das $props-Rune entgegen
     let { data } = $props();
 
@@ -73,149 +73,190 @@
 <svelte:head>
     <title>Statistiken</title>
 </svelte:head>
+<style>
+    /* Layout wrapper */
+  .page-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; color: #1e293b; }
+    .header-section { text-align: center; margin-bottom: 1.5rem; }
+    .header-section h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem 0; }
+    .header-section p { color: #64748b; margin: 0; }
 
-<div class="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
-    <div class="space-y-3">
-        <h1 class="h1">Training Statistiken</h1>
-        <p class="text-surface-600">Übersicht deiner absolvierten Trainings mit Mobile-optimierten Charts.</p>
+    /* Small metric cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    @media(min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    .mini-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
+    .mini-card-label { font-size: 0.85rem; color: #64748b; }
+    .mini-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+
+    /* Main card containers for charts / sections */
+    .main-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 1rem; }
+
+    /* Chart row (used inside main-card) */
+    .chart-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+    .chart-label { font-size: 0.95rem; font-weight: 600; color: #0f172a; }
+    .chart-track { background: rgba(15,23,42,0.06); border-radius: 999px; height: 0.9rem; overflow: hidden; }
+    .chart-fill { height: 100%; background: linear-gradient(90deg,#38bdf8,#818cf8); border-radius: 999px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem 0.75rem; }
+    tr + tr { border-top: 1px solid #eef2f7; }
+
+    /* Responsive table: Desktop view */
+    @media (min-width: 601px) {
+        .training-list { display: table; width: 100%; }
+        .training-row { display: table-row; }
+        .training-cell { display: table-cell; padding: 0.5rem 0.75rem; }
+        .training-header { display: table-header-group; font-weight: 700; background-color: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .training-body { display: table-row-group; }
+        .training-mobile { display: none; }
+    }
+
+    /* Responsive table: Mobile view */
+    @media (max-width: 600px) {
+        .training-list, .training-header { display: none; }
+        .training-mobile { display: block; width: 100%; box-sizing: border-box; }
+        .training-mobile .training-body { display: flex; flex-direction: column; gap: 0.75rem; }
+        .training-mobile .training-row { display: flex; flex-direction: column; gap: 0.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0; box-sizing: border-box; width: 100%; }
+        .training-mobile .training-cell { display: block; padding: 0; box-sizing: border-box; }
+        .training-cell-label { font-weight: 600; font-size: 0.85rem; color: #64748b; display: block; margin-bottom: 0.25rem; }
+        .training-cell-value { color: #0f172a; display: block; }
+    }
+
+    .btn-link { color: #2563eb; text-decoration: none; font-weight: 600; }
+</style>
+
+<div class="page-wrapper">
+    <div class="header-section">
+        <h1>Training Statistiken</h1>
+        <p>Übersicht deiner absolvierten Trainings mit Mobile-optimierten Charts.</p>
     </div>
 
     {#if data.success && data.trainings && data.trainings.length > 0}
-        <div class="grid gap-4">
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="card p-4 variant-glass-surface">
-                    <div class="text-sm text-surface-600">Trainings gesamt</div>
-                    <div class="text-3xl font-bold">{data.trainings.length}</div>
-                </div>
-                <div class="card p-4 variant-glass-surface">
-                    <div class="text-sm text-surface-600">Energetischer Aufwand</div>
-                    <div class="text-3xl font-bold text-success-500">{totalCalories} kcal</div>
-                </div>
-                <div class="card p-4 variant-glass-surface">
-                    <div class="text-sm text-surface-600">Gesamtdistanz</div>
-                    <div class="text-3xl font-bold">{Number(totalDistance).toFixed(1)} km</div>
-                </div>
-                <div class="card p-4 variant-glass-surface">
-                    <div class="text-sm text-surface-600">Ø Mental Score</div>
-                    <div class="text-3xl font-bold">{avgMentalScore} / 5</div>
-                </div>
+        <div class="stats-grid">
+            <div class="mini-card">
+                <div class="mini-card-label">Trainings gesamt</div>
+                <div class="mini-card-value">{data.trainings.length}</div>
             </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Energetischer Aufwand</div>
+                <div class="mini-card-value">{totalCalories} kcal</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Gesamtdistanz</div>
+                <div class="mini-card-value">{Number(totalDistance).toFixed(1)} km</div>
+            </div>
+            <div class="mini-card">
+                <div class="mini-card-label">Ø Mental Score</div>
+                <div class="mini-card-value">{avgMentalScore} / 5</div>
+            </div>
+        </div>
 
-            <div class="card p-6 variant-glass-surface">
-                <h2 class="h2 mb-4">Totalvolumen pro Sport</h2>
-                <div class="space-y-4">
-                    {#each chartSportBars as bar}
-                        <div class="chart-row">
-                            <div class="chart-label" style="min-width: 100px;">{bar.sport}</div>
-                            <div class="chart-track">
-                                <div class="chart-fill" style="width:{bar.width}%;"></div>
+        <div class="main-card">
+            <h2 style="margin-top:0;margin-bottom:0.75rem;font-size:1.125rem;font-weight:700;">Totalvolumen pro Sport</h2>
+            {#each chartSportBars as bar}
+                <div class="chart-row">
+                    <div class="chart-label">{bar.sport}</div>
+                    <div class="chart-track"><div class="chart-fill" style="width:{bar.width}%;"></div></div>
+                    <div class="chart-value">{bar.value.toFixed(1)} km</div>
+                </div>
+            {/each}
+        </div>
+
+        <div class="main-card" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start;">
+            <div>
+                <h3 style="margin:0 0 0.5rem 0;font-weight:700;">Mental vs. Schmerz</h3>
+                <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                    <div>Niedriges Schmerzlevel (0-5): <strong style="float:right">{painMental.low} / 5</strong></div>
+                    <div>Hohes Schmerzlevel (6-10): <strong style="float:right">{painMental.high} / 10</strong></div>
+                </div>
+                <p style="color:#64748b;margin-top:0.75rem;font-size:0.9rem;">Diese Kennzahl hilft dir, mentale Stärke in Abhängigkeit zum Belastungsempfinden einzuschätzen.</p>
+            </div>
+            <div>
+                <h3 style="margin:0 0 0.5rem 0;font-weight:700;">Energetische Auswertung</h3>
+                <p style="font-size:1.5rem;font-weight:800;color:#16a34a;margin:0">{totalCalories} kcal</p>
+                <p style="color:#64748b;margin-top:0.5rem;font-size:0.9rem;">Berechnet mit standardisierten MET-Werten für Schwimmen (8.0), Radfahren (7.5) und Laufen (9.5).</p>
+            </div>
+        </div>
+
+        <div class="main-card">
+            <h2 style="margin:0 0 0.75rem 0;font-weight:700;">Letzte Trainings</h2>
+            
+            <!-- Desktop Table View -->
+            <table class="training-list">
+                <thead class="training-header">
+                    <tr class="training-row">
+                        <th class="training-cell">Datum</th>
+                        <th class="training-cell" style="text-align:right;">Distanz</th>
+                        <th class="training-cell" style="text-align:right;">Dauer</th>
+                        <th class="training-cell" style="text-align:center;">Schmerz</th>
+                        <th class="training-cell" style="text-align:center;">Befinden</th>
+                    </tr>
+                </thead>
+                <tbody class="training-body">
+                    {#each data.trainings as training (training._id)}
+                        <tr class="training-row">
+                            <td class="training-cell">
+                                {new Date(training.createdAt || training.date).toLocaleDateString('de-DE')}
+                                <div style="font-size:0.75rem;color:#64748b">{new Date(training.createdAt || training.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</div>
+                            </td>
+                            <td class="training-cell" style="text-align:right">{Number(training.distance || 0).toFixed(1)} km</td>
+                            <td class="training-cell" style="text-align:right">{training.duration} min</td>
+                            <td class="training-cell" style="text-align:center"><span style="padding:0.25rem 0.5rem;border-radius:6px;background:#fee2e2;color:#991b1b">{training.painLevel}/10</span></td>
+                            <td class="training-cell" style="text-align:center"><span style="padding:0.25rem 0.5rem;border-radius:6px;background:#ecfccb;color:#365314">{training.mentalScore}/5</span></td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+
+            <!-- Mobile Card View -->
+            <div class="training-mobile">
+                <div class="training-body">
+                    {#each data.trainings as training (training._id)}
+                        <div class="training-row">
+                            <div class="training-cell">
+                                <span class="training-cell-label">Sportart</span>
+                                <span class="training-cell-value">{training.sport}</span>
+                                <span style="margin-left:0.5rem;padding:0.25rem 0.5rem;border-radius:6px;background:#fee2e2;color:#991b1b;font-size:0.85rem">{training.painLevel}/10</span>
                             </div>
-                            <div class="chart-value font-semibold">{bar.value.toFixed(1)} km</div>
+                            <div class="training-cell">
+                                <span class="training-cell-label">Datum & Zeit</span>
+                                <span class="training-cell-value">
+                                    {new Date(training.createdAt || training.date).toLocaleDateString('de-DE')}
+                                    {new Date(training.createdAt || training.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                            <div class="training-cell" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+                                <div>
+                                    <span class="training-cell-label">Distanz</span>
+                                    <span class="training-cell-value">{Number(training.distance || 0).toFixed(1)} km</span>
+                                </div>
+                                <div>
+                                    <span class="training-cell-label">Dauer</span>
+                                    <span class="training-cell-value">{training.duration} min</span>
+                                </div>
+                            </div>
+                            <div class="training-cell">
+                                <span class="training-cell-label">Mental Score</span>
+                                <span style="padding:0.25rem 0.5rem;border-radius:6px;background:#ecfccb;color:#365314">{training.mentalScore}/5</span>
+                            </div>
                         </div>
                     {/each}
                 </div>
             </div>
-
-            <div class="card p-6 variant-glass-surface grid gap-6 sm:grid-cols-2">
-                <div>
-                    <h2 class="h3 mb-3">Mental vs. Schmerz</h2>
-                    <div class="space-y-2">
-                        <div class="badge variant-soft-success p-2 block text-left w-full">Niedriges Schmerzlevel (0-5): <strong class="float-right text-base">{painMental.low} / 5</strong></div>
-                        <div class="badge variant-soft-warning p-2 block text-left w-full">Hohes Schmerzlevel (6-10): <strong class="float-right text-base">{painMental.high} / 5</strong></div>
-                    </div>
-                    <p class="text-sm text-surface-600 mt-3">Diese Kennzahl hilft dir, mentale Stärke in Abhängigkeit zum Belastungsempfinden einzuschätzen.</p>
-                </div>
-                <div>
-                    <h2 class="h3 mb-3">Energetische Auswertung</h2>
-                    <p class="text-2xl font-bold text-success-600">{totalCalories} kcal</p>
-                    <p class="text-sm text-surface-600 mt-1">Berechnet mit standardisierten MET-Werten für Schwimmen (8.0), Radfahren (7.5) und Laufen (9.5).</p>
-                </div>
-            </div>
-
-            <div class="card p-6 variant-glass-surface overflow-x-auto">
-                <h2 class="h2 mb-4">Letzte Trainings</h2>
-                <table class="w-full text-sm">
-                    <thead class="border-b border-surface-300">
-                        <tr>
-                            <th class="text-left py-2">Datum</th>
-                            <th class="text-left py-2">Sportart</th>
-                            <th class="text-right py-2">Distanz</th>
-                            <th class="text-right py-2">Dauer</th>
-                            <th class="text-center py-2">Schmerz</th>
-                            <th class="text-center py-2">Befinden</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each data.trainings as training (training._id)}
-                            <tr class="border-b border-surface-200 hover:bg-surface-50/50 transition-colors">
-                                <td class="py-3">
-                                    {new Date(training.createdAt || training.date).toLocaleDateString('de-DE')}
-                                    <span class="text-xs text-surface-600 block">{new Date(training.createdAt || training.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
-                                </td>
-                                <td class="py-3 font-semibold">{training.sport}</td>
-                                <td class="text-right py-3">{Number(training.distance || 0).toFixed(1)} km</td>
-                                <td class="text-right py-3">{training.duration} min</td>
-                                <td class="text-center py-3">
-                                    <span class="badge variant-soft-error">{training.painLevel}/10</span>
-                                </td>
-                                <td class="text-center py-3">
-                                    <span class="badge" class:variant-soft-success={training.mentalScore >= 4} class:variant-soft-warning={training.mentalScore === 3} class:variant-soft-error={training.mentalScore <= 2}>
-                                        {training.mentalScore}/5
-                                    </span>
-                                </td>
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
-            </div>
         </div>
     {:else if data && !data.success}
-        <div class="alert variant-filled-error">
-            <div class="alert-title">Fehler beim Laden</div>
-            <div class="alert-message">{data.error || 'Trainings konnten nicht geladen werden'}</div>
+        <div class="main-card">
+            <div style="font-weight:700;color:#b91c1c">Fehler beim Laden</div>
+            <div style="color:#475569">{data.error || 'Trainings konnten nicht geladen werden'}</div>
         </div>
     {:else}
-        <div class="alert variant-filled-surface p-6 text-center">
-            <div class="alert-title text-xl font-bold mb-2">Keine Trainings vorhanden</div>
-            <div class="alert-message mb-4">Starten Sie ein Training, um hier Ihre Statistiken zu sehen.</div>
-            <a href="/trainings" class="btn variant-filled-primary font-bold">Jetzt erstes Training erfassen →</a>
+        <div class="main-card" style="text-align:center">
+            <div style="font-weight:800;font-size:1.125rem;margin-bottom:0.5rem">Keine Trainings vorhanden</div>
+            <div style="color:#64748b;margin-bottom:1rem">Starten Sie ein Training, um hier Ihre Statistiken zu sehen.</div>
+            <a href="/trainings" class="btn-link">Jetzt erstes Training erfassen →</a>
         </div>
     {/if}
 
-    <div class="mt-8">
-        <a href="/trainings" class="btn variant-outlined-primary">← Zurück zu Trainings</a>
+    <div style="margin-top:1rem;text-align:left">
+        <a href="/trainings" class="btn-link">← Zurück zu Trainings</a>
     </div>
 </div>
-
-<style>
-    .chart-row {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .chart-label {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: var(--surface-900, #0f172a);
-    }
-
-    .chart-track {
-        background: rgba(15, 23, 42, 0.08);
-        border-radius: 999px;
-        height: 1rem;
-        overflow: hidden;
-    }
-
-    .chart-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #38bdf8, #818cf8);
-        border-radius: 999px;
-        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    table {
-        border-collapse: collapse;
-    }
-</style>
