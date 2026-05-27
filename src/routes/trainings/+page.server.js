@@ -27,9 +27,8 @@ export const actions = {
 		const durationSeconds = formData.get('durationSeconds');
 		const datetime = formData.get('datetime');
 		const notes = formData.get('notes');
-		// pain/mental optional; fall back to sensible defaults when not provided
-		const painLevel = formData.get('painLevel') ?? '0';
-		const mentalScore = formData.get('mentalScore') ?? '3';
+		const painLevel = formData.get('painLevel');
+		const mentalScore = formData.get('mentalScore');
 
 		// 2. Validierung mit detaillierten Fehlerprüfungen
 		const errors = {};
@@ -65,15 +64,15 @@ export const actions = {
 			errors.duration = 'Dauer muss mindestens 10 Sekunden betragen';
 		}
 
-		// Pain Level validieren (0-10) — optional
+		// Schmerzlevel validieren (1-10)
 		const painLevelNum = parseInt(painLevel, 10);
-		if (isNaN(painLevelNum) || painLevelNum < 0 || painLevelNum > 10) {
-			errors.painLevel = 'Pain Level muss zwischen 0 und 10 liegen';
+		if (!painLevel || isNaN(painLevelNum) || painLevelNum < 1 || painLevelNum > 10) {
+			errors.painLevel = 'Schmerzlevel muss zwischen 1 und 10 liegen';
 		}
 
-		// Mental Score validieren (1-5) — optional
+		// Mental Score validieren (1-5)
 		const mentalScoreNum = parseInt(mentalScore, 10);
-		if (isNaN(mentalScoreNum) || mentalScoreNum < 1 || mentalScoreNum > 5) {
+		if (!mentalScore || isNaN(mentalScoreNum) || mentalScoreNum < 1 || mentalScoreNum > 5) {
 			errors.mentalScore = 'Mental Score muss zwischen 1 und 5 liegen';
 		}
 

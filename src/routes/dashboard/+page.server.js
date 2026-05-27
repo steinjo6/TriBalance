@@ -35,5 +35,30 @@ export const actions = {
             await trainings.deleteOne({ _id: new ObjectId(id), userId });
         }
         return { success: true };
+    },
+
+    updateTraining: async ({ request, locals }) => {
+        const userId = locals.user?.id;
+        if (!userId) {
+            throw redirect(303, '/login');
+        }
+
+        const data = await request.formData();
+        const id = data.get('id');
+        const distance = parseFloat(String(data.get('distance') ?? '0'));
+        const duration = parseInt(String(data.get('duration') ?? '0'), 10);
+        const painLevel = parseInt(String(data.get('painLevel') ?? '0'), 10);
+        const mentalScore = parseInt(String(data.get('mentalScore') ?? '0'), 10);
+
+        if (!id || isNaN(distance) || distance < 0 || isNaN(duration) || duration < 1 || isNaN(painLevel) || painLevel < 1 || painLevel > 10 || isNaN(mentalScore) || mentalScore < 1 || mentalScore > 5) {
+            return { success: false, error: 'Ungültige Trainingswerte für das Update' };
+        }
+
+        await trainings.updateOne(
+            { _id: new ObjectId(id), userId },
+            { $set: { distance, duration, painLevel, mentalScore, updatedAt: new Date() } }
+        );
+
+        return { success: true };
     }
 };

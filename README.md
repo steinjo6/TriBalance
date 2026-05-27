@@ -27,9 +27,9 @@
 ## 2. Lösungsidee
 - **Kernfunktionalität:**
   * Erfassung von Trainingseinheiten via interaktivem Echtzeit-Formular (Sportart, Distanz, Dauer).
-  * Integriertes Tracking der psychischen Verfassung (Mental Score) und des Fokus-Levels.
-  * Zentrales Dashboard zur Visualisierung physischer Statistiken gepaart mit mentalen Trends.
-  * Historische Übersicht zur Reflexion vergangener Belastungsphasen.
+  * Integriertes Tracking der psychischen Verfassung (Mental Score) und des Schmerz-Empfindens (Pain Level).
+  * Zentrales Dashboard zur Visualisierung physischer Statistiken gepaart mit mentalen Trends und einer tiefergehenden, dedizierten Detailansicht für jede aufgezeichnete Einheit.
+  * Historische Übersicht zur Reflexion vergangener Belastungsphasen inklusive direkter, kompromissloser In-Place-Datenbearbeitung (CRUD).
 
 ## 3. Vorgehen & Artefakte
 
@@ -51,11 +51,15 @@
 - **Informationsarchitektur:** Um eine klare Trennung zwischen Datenerfassung und Datenvisualisierung zu schaffen, wurde das ursprüngliche Single-Page-Design in ein Multi-Route-System überführt:
   * `/trainings` (Write): Dedizierte Route für die Trainingserfassung via Echtzeit-Tracker.
   * `/dashboard` (Read): Zentrale Übersicht, die historische Einträge aggregiert darstellt.
+  * `/dashboard\[id]` (Detail-Read): Eine isolierte, zukunftssichere Detailansicht zur vollständigen Inspektion einzelner Einheiten (inkl. erfasster Textnotizen).
+  * `/statistiken` (Analytics): Übergreifende mathematische Auswertung von mentalen und physischen Parametern.
 - **Globales Layout und Navigation (`+layout.svelte`):** Das Layout bildet das funktionale Gerüst der Applikation. Es wurde primär nach Desktop-First-Prinzipien entwickelt, bietet jedoch durch reaktive CSS-Klassen eine vollständige mobile Adaption. 
 - **Designentscheidungen:** * **Sidebar-Logik:** Auf Viewports > 1024px ist eine 280px breite Sidebar fixiert. Dies minimiert die kognitive Last, da Navigationselemente stets sichtbar sind.
+  * **Unified Design System:** Um ein perfekt homogenes Benutzererlebnis zu garantieren, wurde die gesamte Applikation plattformübergreifend auf eine standardisierte, äußere Container-Klasse (.page-wrapper) refactored. Dies vereinheitlicht Paddings und Breitenbeschränkungen (max-width) auf allen Views (Dashboard, Login, Registrierung, Statistiken).
   * **Mobile Adaption:** Über Tailwind Media-Queries bricht die Sidebar auf Smartphones in einen Bottom-Drawer um (*Thumb-Zone*-Design), was die Einhandbedienung erleichtert.
   * **Floating Action Button (FAB):** Ein zentraler "+"-Button dient auf Mobilgeräten als primärer Call-to-Action (CTA), um die Interaktionskosten beim Starten eines Trainings zu minimieren.
   * **Slider-Eingabe:** Nutzung eines numerischen Sliders (1-5) für den Mental-Fokus zur Senkung der Hürde bei der Dateneingabe.
+  * **Mathematische Skalen-Definitionen:** Zur Vermeidung sportwissenschaftlicher Verzerrungen wurden sämtliche Skalen-Untergrenzen hart von 0 auf 1 angehoben. Der Mental Score operiert somit strikt im Bereich 1–5 (Anzeige: Y / 5), während das Schmerzlevel im Bereich 1–10 (Anzeige: X / 10) abgebildet wird.
 
 #### 3.4.2. Umsetzung (Technik)
 - **Technologie-Stack:** SvelteKit (HTML/CSS/JavaScript), Tailwind CSS (Layout & Design), MongoDB (Datenbank-Persistenz via offiziellen `mongodb`-Treiber).
@@ -84,16 +88,15 @@ Während der Entwicklung traten kritische Fehler bei der Anbindung der entfernte
   * Implementierung einer serverseitigen SvelteKit Form Action (`src/routes/trainings/+page.server.js`), welche die Formulardaten asynchron via `use:enhance` entgegennimmt.
   * Integration einer strikten serverseitigen Typ-Validierung (Konvertierung von Strings in numerische `Number`-Typen für Distanz, Dauer, Pain-Level und Mental-Score).
   * Erfolgreiche Verknüpfung mit der exportierten `trainings`-Collection aus `db.js` zur persistenten Speicherung in MongoDB Atlas sowie automatische Weiterleitung (`redirect`) auf die `/statistiken`-Route nach erfolgreichem Write-In.
-
-  System-Stabilisierung & Authentifizierung:
-
-Daten-Serialisierung: Korrektur des Serialisierungsfehlers auf der Statistik-Seite durch explizite Typ-Umwandlung von ObjectId zu String in +page.server.js.
-
-Authentifizierungs-Layer: Implementierung eines sessionbasierten Auth-Systems mittels cookies.set und serverseitigen Redirects. Schutz der Routen (/trainings, /statistiken) durch Middleware-Session-Validierung.
-
-Mandantentrennung: Umstellung der Datenbank-Abfragen auf eine explizite userId-Filterung (find({ userId: sessionId })), um sicherzustellen, dass Benutzer ausschließlich ihre eigenen, persönlichen Trainingsdaten einsehen können.
-
-Layout-Modernisierung: Abschluss des Refactorings auf Svelte 5 ($props), Beseitigung von legacy_export_invalid-Konflikten im +layout.svelte und finale Konfiguration der Navigation inklusive dynamischem Login/Logout-Status.
+4. **System-Stabilisierung & Authentifizierung:**
+  * Daten-Serialisierung: Korrektur des Serialisierungsfehlers auf der Statistik-Seite durch explizite Typ-Umwandlung von ObjectId zu String in +page.server.js.
+  * Authentifizierungs-Layer: Implementierung eines sessionbasierten Auth-Systems mittels cookies.set und serverseitigen Redirects. Schutz der Routen (/trainings, /statistiken) durch Middleware-Session-Validierung.
+  * Mandantentrennung: Umstellung der Datenbank-Abfragen auf eine explizite userId-Filterung (find({ userId: sessionId })), um sicherzustellen, dass Benutzer ausschließlich ihre eigenen, persönlichen Trainingsdaten einsehen können.
+  * Layout-Modernisierung: Abschluss des Refactorings auf Svelte 5 ($props), Beseitigung von legacy_export_invalid-Konflikten im +layout.svelte und finale Konfiguration der Navigation inklusive dynamischem Login/Logout-Status.
+5. * Das Dashboard-Refactoring, die Umstellung der Karten auf Link-Tags   (<a>), die native Routen-Weiterleitung zur Detailseite (/trainings/[id]) und das Abfangen des Event-Bubblings via onclick|stopPropagation im Drei-Punkt-Optionenmenü (⋮).
+6. * Das dynamische In-Place-Editing direkt auf dem Dashboard via $state-Rune (editingId), das asynchrone Speichern über die fetch-API gegen die Server-Action ?/updateTraining sowie die integrierte Lösch-Sicherheitsabfrage (confirm()).
+7. * Die Behebung des MongoDB-Importpfads in der neuen Server-Load-Funktion (trainings/[id]/+page.server.js) und die saubere JSON-Serialisierung des abgerufenen Dokument-Objekts.
+8. * Die Umstrukturierung der mobilen Tabellenansicht in reaktive Karten, die Implementierung des Schmerzdurchschnitts (avgPainScore) via $derived.by-Rune und das Erstellen des vollkommen symmetrischen, mobilen 2-Spalten-Grids mit der gestreckten fünften Metrik-Karte (grid-column: span 2;).
 
 ### 3.5 Validate
 - **Ziele der Prüfung:** Testen, ob Triathleten das Koppeln von physischer Dauer und dem subjektiven Mental-Score intuitiv verstehen und ob das UI während der Bewegung (Tracking) fehlerfrei bedienbar bleibt.

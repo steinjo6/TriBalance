@@ -68,33 +68,42 @@
             ? ((data.trainings.reduce((sum, t) => sum + Number(t.mentalScore || 0), 0) / data.trainings.length)).toFixed(1)
             : '0.0'
     );
+
+    let avgPainScore = $derived.by(() => {
+        const trainings = data.trainings ?? [];
+        if (!trainings.length) return '0.0';
+        const sum = trainings.reduce((sum, t) => sum + Number(t.painLevel || 0), 0);
+        return (sum / trainings.length).toFixed(1);
+    });
 </script>
 
 <svelte:head>
     <title>Statistiken</title>
 </svelte:head>
+
 <style>
     /* Layout wrapper */
-  .page-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; color: #1e293b; }
+    .page-wrapper { max-width: 900px; margin: 2rem auto; padding: 0 1rem; font-family: system-ui, sans-serif; color: #1e293b; }
     .header-section { text-align: center; margin-bottom: 1.5rem; }
     .header-section h1 { font-size: 2rem; font-weight: 800; margin: 0 0 0.5rem 0; }
     .header-section p { color: #64748b; margin: 0; }
 
     /* Small metric cards */
     .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
-    @media(min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
-    .mini-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; }
-    .mini-card-label { font-size: 0.85rem; color: #64748b; }
-    .mini-card-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+    
+    /* Mobilgeräte: Genau zwei Spalten nebeneinander, ungerade Karte füllt volle Breite */
+    @media (max-width: 600px) { 
+        .stats-grid { grid-template-columns: repeat(2, 1fr); } 
+        .mini-card.full-mobile { grid-column: span 2; }
+    }
+    @media(min-width: 1024px) { .stats-grid { grid-template-columns: repeat(5, 1fr); } }
+    
+    .mini-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
+    .mini-card-label { font-size: 0.85rem; color: #64748b; font-weight: 600; margin-bottom: 0.25rem; }
+    .mini-card-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
 
     /* Main card containers for charts / sections */
     .main-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.25rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04); margin-bottom: 1rem; }
-
-    /* Chart row (used inside main-card) */
-    .chart-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-    .chart-label { font-size: 0.95rem; font-weight: 600; color: #0f172a; }
-    .chart-track { background: rgba(15,23,42,0.06); border-radius: 999px; height: 0.9rem; overflow: hidden; }
-    .chart-fill { height: 100%; background: linear-gradient(90deg,#38bdf8,#818cf8); border-radius: 999px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 0.5rem 0.75rem; }
@@ -148,24 +157,17 @@
                 <div class="mini-card-label">Ø Mental Score</div>
                 <div class="mini-card-value">{avgMentalScore} / 5</div>
             </div>
-        </div>
-
-        <div class="main-card">
-            <h2 style="margin-top:0;margin-bottom:0.75rem;font-size:1.125rem;font-weight:700;">Totalvolumen pro Sport</h2>
-            {#each chartSportBars as bar}
-                <div class="chart-row">
-                    <div class="chart-label">{bar.sport}</div>
-                    <div class="chart-track"><div class="chart-fill" style="width:{bar.width}%;"></div></div>
-                    <div class="chart-value">{bar.value.toFixed(1)} km</div>
-                </div>
-            {/each}
+            <div class="mini-card full-mobile">
+                <div class="mini-card-label">Ø Schmerzlevel</div>
+                <div class="mini-card-value">{avgPainScore} / 10</div>
+            </div>
         </div>
 
         <div class="main-card" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start;">
             <div>
                 <h3 style="margin:0 0 0.5rem 0;font-weight:700;">Mental vs. Schmerz</h3>
                 <div style="display:flex;flex-direction:column;gap:0.5rem;">
-                    <div>Niedriges Schmerzlevel (0-5): <strong style="float:right">{painMental.low} / 5</strong></div>
+                    <div>Niedriges Schmerzlevel (1-5): <strong style="float:right">{painMental.low} / 5</strong></div>
                     <div>Hohes Schmerzlevel (6-10): <strong style="float:right">{painMental.high} / 10</strong></div>
                 </div>
                 <p style="color:#64748b;margin-top:0.75rem;font-size:0.9rem;">Diese Kennzahl hilft dir, mentale Stärke in Abhängigkeit zum Belastungsempfinden einzuschätzen.</p>
@@ -180,7 +182,6 @@
         <div class="main-card">
             <h2 style="margin:0 0 0.75rem 0;font-weight:700;">Letzte Trainings</h2>
             
-            <!-- Desktop Table View -->
             <table class="training-list">
                 <thead class="training-header">
                     <tr class="training-row">
@@ -207,36 +208,42 @@
                 </tbody>
             </table>
 
-            <!-- Mobile Card View -->
             <div class="training-mobile">
                 <div class="training-body">
                     {#each data.trainings as training (training._id)}
                         <div class="training-row">
-                            <div class="training-cell">
-                                <span class="training-cell-label">Sportart</span>
-                                <span class="training-cell-value">{training.sport}</span>
-                                <span style="margin-left:0.5rem;padding:0.25rem 0.5rem;border-radius:6px;background:#fee2e2;color:#991b1b;font-size:0.85rem">{training.painLevel}/10</span>
+                            <div class="training-cell" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                <div>
+                                    <span class="training-cell-label">Sportart</span>
+                                    <span class="training-cell-value" style="font-weight:700;">{training.sport}</span>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span class="training-cell-label">Schmerzlevel</span>
+                                    <span style="padding:0.25rem 0.5rem;border-radius:6px;background:#fee2e2;color:#991b1b;font-size:0.85rem;display:inline-block;margin-top:0.25rem;">{training.painLevel}/10</span>
+                                </div>
                             </div>
-                            <div class="training-cell">
-                                <span class="training-cell-label">Datum & Zeit</span>
-                                <span class="training-cell-value">
-                                    {new Date(training.createdAt || training.date).toLocaleDateString('de-DE')}
-                                    {new Date(training.createdAt || training.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                            <div class="training-cell" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+                                <div>
+                                    <span class="training-cell-label">Datum & Zeit</span>
+                                    <span class="training-cell-value" style="font-size:0.9rem;">
+                                        {new Date(training.createdAt || training.date).toLocaleDateString('de-DE')} <br/>
+                                        {new Date(training.createdAt || training.date).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span class="training-cell-label">Dauer</span>
+                                    <span class="training-cell-value">{training.duration} min</span>
+                                </div>
                             </div>
                             <div class="training-cell" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
                                 <div>
                                     <span class="training-cell-label">Distanz</span>
                                     <span class="training-cell-value">{Number(training.distance || 0).toFixed(1)} km</span>
                                 </div>
-                                <div>
-                                    <span class="training-cell-label">Dauer</span>
-                                    <span class="training-cell-value">{training.duration} min</span>
+                                <div style="text-align:right;">
+                                    <span class="training-cell-label">Mental Score</span>
+                                    <span style="padding:0.25rem 0.5rem;border-radius:6px;background:#ecfccb;color:#365314;font-size:0.85rem;display:inline-block;margin-top:0.25rem;">{training.mentalScore}/5</span>
                                 </div>
-                            </div>
-                            <div class="training-cell">
-                                <span class="training-cell-label">Mental Score</span>
-                                <span style="padding:0.25rem 0.5rem;border-radius:6px;background:#ecfccb;color:#365314">{training.mentalScore}/5</span>
                             </div>
                         </div>
                     {/each}

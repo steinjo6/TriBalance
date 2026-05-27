@@ -17,6 +17,8 @@
         datetime: new Date().toISOString().slice(0, 16),
         duration: 60,
         distance: '',
+        painLevel: 3,
+        mentalScore: 3,
         notes: ''
     });
 
@@ -27,6 +29,8 @@
     let liveSport = $state('Laufen');
     let showLiveFinish = $state(false);
     let liveDistance = $state('');
+    let livePain = $state(3);
+    let liveMental = $state(3);
 
     // Stoppuhr-Formatierung
     const timeDisplay = $derived((() => {
@@ -56,6 +60,8 @@
         fd.append('sport', liveSport);
         fd.append('durationSeconds', String(elapsed));
         fd.append('distance', liveDistance || '0');
+        fd.append('painLevel', String(livePain));
+        fd.append('mentalScore', String(liveMental));
         fd.append('datetime', new Date().toISOString());
 
         try {
@@ -74,6 +80,8 @@
         fd.append('datetime', manual.datetime);
         fd.append('duration', String(manual.duration));
         fd.append('distance', manual.distance || '0');
+        fd.append('painLevel', String(manual.painLevel));
+        fd.append('mentalScore', String(manual.mentalScore));
         fd.append('notes', manual.notes);
 
         try {
@@ -304,6 +312,22 @@
                             <label for="live-distance" class="form-label">Distanz (optional, km)</label>
                             <input id="live-distance" type="number" min="0" step="0.01" bind:value={liveDistance} class="custom-input" />
                         </div>
+                        <div class="form-group">
+                            <label for="live-pain" class="form-label">Schmerzlevel</label>
+                            <select id="live-pain" bind:value={livePain} class="custom-select">
+                                {#each Array.from({ length: 10 }, (_, i) => i + 1) as value}
+                                    <option value={value}>{value} / 10</option>
+                                {/each}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="live-mental" class="form-label">Mental Score</label>
+                            <select id="live-mental" bind:value={liveMental} class="custom-select">
+                                {#each Array.from({ length: 5 }, (_, i) => i + 1) as value}
+                                    <option value={value}>{value} / 5</option>
+                                {/each}
+                            </select>
+                        </div>
                         <button type="button" class="primary-btn" onclick={submitLive} disabled={isSubmitting}>
                             {isSubmitting ? 'Speichert…' : '✓ Speichern & beenden'}
                         </button>
@@ -340,6 +364,24 @@
                 <div class="form-group">
                     <label for="manual-distance" class="form-label">Distanz (optional, km)</label>
                     <input id="manual-distance" type="number" min="0" step="0.01" bind:value={manual.distance} class="custom-input" />
+                </div>
+
+                <div class="form-group">
+                    <label for="manual-pain" class="form-label">Schmerzlevel</label>
+                    <select id="manual-pain" bind:value={manual.painLevel} class="custom-select">
+                        {#each Array.from({ length: 10 }, (_, i) => i + 1) as value}
+                            <option value={value}>{value} / 10</option>
+                        {/each}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="manual-mental" class="form-label">Mental Score</label>
+                    <select id="manual-mental" bind:value={manual.mentalScore} class="custom-select">
+                        {#each Array.from({ length: 5 }, (_, i) => i + 1) as value}
+                            <option value={value}>{value} / 5</option>
+                        {/each}
+                    </select>
                 </div>
 
                 <div class="form-group">
