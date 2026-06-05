@@ -55,7 +55,7 @@
         <div style="font-weight:700; font-size:1.25rem; margin-bottom:1.5rem; padding:0.5rem;">TriBalance</div>
         
         <a href="/dashboard" class="menu-item">Dashboard</a>
-        <a href="/trainings" class="menu-item">Trainings</a>
+        <a href="/trainings" class="menu-item">Training</a>
         <a href="/statistiken" class="menu-item">Statistiken</a>
         
         <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;" />
@@ -74,7 +74,7 @@
     {#if data?.user}
         <nav class="mobile-nav">
             <a href="/dashboard" class="mobile-nav-link">Dashboard</a>
-            <a href="/trainings" class="mobile-nav-link">Trainings</a>
+            <a href="/trainings" class="mobile-nav-link">Training</a>
             <a href="/statistiken" class="mobile-nav-link">Statistiken</a>
             <a href="/logout" class="mobile-nav-link" style="color:#f87171;">Ausloggen</a>
         </nav>

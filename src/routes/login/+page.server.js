@@ -26,10 +26,12 @@ export const actions = {
             return fail(400, { errors: { general: 'Bitte verifiziere zuerst deine E-Mail.' }, data: { username } });
         }
 
+        // Cookie-Konfiguration mit fixer 30-Tage-Lebensdauer
         cookies.set('session', user._id.toString(), {
             path: '/',
-            httpOnly: true,
-            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 30, // 30 Tage in Sekunden (Garantiert stabiles Tracking!)
+            httpOnly: true,            // Schützt vor bösartigem JavaScript-Zugriff (XSS)
+            sameSite: 'lax',           // Schutz vor CSRF-Angriffen bei normaler Navigation
             secure: process.env.NODE_ENV === 'production'
         });
 

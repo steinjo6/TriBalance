@@ -16,13 +16,26 @@ export const handle: Handle = async ({ event, resolve }) => {
                 // Nur wenn verifiziert, setzen wir locals.user
                 if (user.isVerified) {
                     event.locals.user = { id: user._id.toString(), username: user.username };
+                    
+                    // 🔥 KEEP-ALIVE FIX: Cookie bei jedem erfolgreichen Seitenaufruf um 30 Tage verlängern
+                    event.cookies.set('session', sessionId, {
+                        path: '/',
+                        maxAge: 60 * 60 * 24 * 30, // 30 Tage in Sekunden
+                        httpOnly: true,
+                        sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production'
+                    });
                 } else {
-                    // Falls nicht verifiziert, Session löschen
+                    // Falls nicht verifiziert, Session sicher löschen
                     event.cookies.delete('session', { path: '/' });
                 }
+            } else {
+                // Falls die Session-ID in der DB gar nicht existiert (z.B. User gelöscht)
+                event.cookies.delete('session', { path: '/' });
             }
         } catch (e) {
-            // Falls ID ungültig, einfach weiter
+            // Falls ID ungültig oder DB-Fehler, Cookie zur Sicherheit entfernen
+            event.cookies.delete('session', { path: '/' });
         }
     }
 
