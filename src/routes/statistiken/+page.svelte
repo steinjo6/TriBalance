@@ -293,7 +293,6 @@
 <div class="page-wrapper">
     <div class="header-section">
         <h1>Statistiken</h1>
-        <p>Übersicht deiner absolvierten Trainings mit Mobile-optimierten Charts.</p>
     </div>
 
     {#if data.success && data.trainings && data.trainings.length > 0}

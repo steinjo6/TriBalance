@@ -100,7 +100,6 @@
 <div class="page-wrapper">
     <div class="header-section">
         <h1 class="h1">Dashboard</h1>
-        <p class="subtext">Übersicht deiner letzten Trainings</p>
     </div>
 
     <div class="main-card">

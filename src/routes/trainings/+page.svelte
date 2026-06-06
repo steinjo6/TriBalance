@@ -26,6 +26,22 @@
 
 
 
+    $effect(() => {
+        const handleResize = () => {
+            if (window.innerWidth > 768 && activeTab === 'live') {
+                activeTab = 'manual';
+            }
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    });
+
+
     onMount(() => {
 
         if (window.innerWidth > 768) {
@@ -44,7 +60,7 @@
 
         sport: 'Laufen',
 
-        datetime: new Date().toISOString().slice(0, 16),
+        datetime: new Date().toISOString().slice(0, 10),
 
         duration: 60,
 
@@ -148,7 +164,7 @@
 
             await fetch('?/create', { method: 'POST', body: fd });
 
-            window.location.reload();
+            window.location.href = '/dashboard';
 
         } catch (e) {
 
@@ -204,7 +220,7 @@
 
             await fetch('?/create', { method: 'POST', body: fd });
 
-            window.location.reload();
+            window.location.href = '/dashboard';
 
         } catch (e) {
 
@@ -344,11 +360,6 @@
 
     }
 
-    .manual-title .mobile-label {
-
-        display: none;
-
-    }
 
     @media (max-width: 768px) {
 
@@ -396,39 +407,10 @@
 
         }
 
+
         .manual-title .desktop-label {
 
             display: none;
-
-        }
-
-        .manual-title .mobile-label {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            width: 100%;
-
-            padding: 0.75rem 1rem;
-
-            border-radius: 12px;
-
-            border: 1px solid #cbd5e1;
-
-            background: #ffffff;
-
-            color: #475569;
-
-            font-size: 1rem;
-
-            font-weight: 700;
-
-            cursor: pointer;
-
-            text-align: center;
 
         }
 
@@ -710,7 +692,6 @@
 
         <h1 style="font-size: 2rem; margin: 0 0 0.5rem 0; font-weight: 800;">Trainings</h1>
 
-        <p style="margin: 0; color: #64748b; font-size: 0.95rem;">Wähle eine Option, um deine Einheiten zu speichern.</p>
 
     </div>
 
@@ -808,33 +789,21 @@
 
                         <div class="form-group">
 
-                            <label for="live-pain" class="form-label">Schmerzlevel</label>
+                            <label for="live-pain" class="form-label">Schmerzlevel * (Wie hart war dein Training / Hattest du Schmerzen?)</label>
 
-                            <select id="live-pain" bind:value={livePain} class="custom-select">
+                            <input id="live-pain" type="range" min="1" max="10" step="1" bind:value={livePain} class="custom-input" required />
 
-                                {#each Array.from({ length: 10 }, (_, i) => i + 1) as value}
-
-                                    <option value={value}>{value} / 10</option>
-
-                                {/each}
-
-                            </select>
+                            <div style="font-size:0.9rem; color:#64748b; margin-top:0.35rem;">Wert: {livePain} / 10</div>
 
                         </div>
 
                         <div class="form-group">
 
-                            <label for="live-mental" class="form-label">Mental Score</label>
+                            <label for="live-mental" class="form-label">Mental Score * (Wie ging es dir dabei mental?)</label>
 
-                            <select id="live-mental" bind:value={liveMental} class="custom-select">
+                            <input id="live-mental" type="range" min="1" max="5" step="1" bind:value={liveMental} class="custom-input" required />
 
-                                {#each Array.from({ length: 5 }, (_, i) => i + 1) as value}
-
-                                    <option value={value}>{value} / 5</option>
-
-                                {/each}
-
-                            </select>
+                            <div style="font-size:0.9rem; color:#64748b; margin-top:0.35rem;">Wert: {liveMental} / 5</div>
 
                         </div>
 
@@ -862,7 +831,6 @@
 
                 <span class="desktop-label">Training aufzeichnen</span>
 
-                <button type="button" class="mobile-label" onclick={() => activeTab = 'manual'}>✍️ Manuell nachtragen</button>
 
             </div>
 
@@ -872,9 +840,9 @@
 
                 <div class="form-group">
 
-                    <label for="manual-sport" class="form-label">Sportart</label>
+                    <label for="manual-sport" class="form-label">Sportart *</label>
 
-                    <select id="manual-sport" bind:value={manual.sport} class="custom-select">
+                    <select id="manual-sport" bind:value={manual.sport} class="custom-select" required>
 
                         <option>Laufen</option>
 
@@ -890,9 +858,9 @@
 
                 <div class="form-group">
 
-                    <label for="manual-datetime" class="form-label">Datum & Uhrzeit</label>
+                    <label for="manual-datetime" class="form-label">Datum *</label>
 
-                    <input id="manual-datetime" type="datetime-local" bind:value={manual.datetime} class="custom-input" />
+                    <input id="manual-datetime" type="date" bind:value={manual.datetime} class="custom-input" required />
 
                 </div>
 
@@ -900,9 +868,9 @@
 
                 <div class="form-group">
 
-                    <label for="manual-duration" class="form-label">Dauer (Minuten)</label>
+                    <label for="manual-duration" class="form-label">Dauer (Minuten) *</label>
 
-                    <input id="manual-duration" type="number" min="1" step="1" bind:value={manual.duration} class="custom-input" />
+                    <input id="manual-duration" type="number" min="1" step="1" bind:value={manual.duration} class="custom-input" required />
 
                 </div>
 
@@ -920,17 +888,11 @@
 
                 <div class="form-group">
 
-                    <label for="manual-pain" class="form-label">Schmerzlevel</label>
+                    <label for="manual-pain" class="form-label">Schmerzlevel * (Wie hart war dein Training?)</label>
 
-                    <select id="manual-pain" bind:value={manual.painLevel} class="custom-select">
+                    <input id="manual-pain" type="range" min="1" max="10" step="1" bind:value={manual.painLevel} class="custom-input" required />
 
-                        {#each Array.from({ length: 10 }, (_, i) => i + 1) as value}
-
-                            <option value={value}>{value} / 10</option>
-
-                        {/each}
-
-                    </select>
+                    <div style="font-size:0.9rem; color:#64748b; margin-top:0.35rem;">Wert: {manual.painLevel} / 10</div>
 
                 </div>
 
@@ -938,17 +900,11 @@
 
                 <div class="form-group">
 
-                    <label for="manual-mental" class="form-label">Mental Score</label>
+                    <label for="manual-mental" class="form-label">Mental Score * (Wie ging es dir dabei mental?)</label>
 
-                    <select id="manual-mental" bind:value={manual.mentalScore} class="custom-select">
+                    <input id="manual-mental" type="range" min="1" max="5" step="1" bind:value={manual.mentalScore} class="custom-input" required />
 
-                        {#each Array.from({ length: 5 }, (_, i) => i + 1) as value}
-
-                            <option value={value}>{value} / 5</option>
-
-                        {/each}
-
-                    </select>
+                    <div style="font-size:0.9rem; color:#64748b; margin-top:0.35rem;">Wert: {manual.mentalScore} / 5</div>
 
                 </div>
 

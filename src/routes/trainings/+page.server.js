@@ -40,7 +40,7 @@ export const actions = {
 
 		// Distanz validieren
 		const distanceNum = parseFloat(distance || '0');
-		if (isNaN(distanceNum) || distanceNum < 0) {
+		if (isNaN(distanceNum) || distanceNum <= 0) {
 			errors.distance = 'Distanz muss eine positive Zahl sein';
 		}
 
@@ -60,25 +60,29 @@ export const actions = {
 			errors.duration = 'Dauer muss angegeben werden (Minuten oder exakte Sekunden)';
 		}
 
-		if (durationSecondsNum !== null && durationSecondsNum < 10) {
+		if (durationFinalMinutes !== null && durationFinalMinutes < 1) {
+			errors.duration = 'Dauer muss mindestens 1 Minute betragen';
+		} else if (durationSecondsNum !== null && durationSecondsNum < 10) {
 			errors.duration = 'Dauer muss mindestens 10 Sekunden betragen';
 		}
 
 		// Schmerzlevel validieren (1-10)
 		const painLevelNum = parseInt(painLevel, 10);
-		if (!painLevel || isNaN(painLevelNum) || painLevelNum < 1 || painLevelNum > 10) {
+		if (isNaN(painLevelNum) || painLevelNum < 1 || painLevelNum > 10) {
 			errors.painLevel = 'Schmerzlevel muss zwischen 1 und 10 liegen';
 		}
 
 		// Mental Score validieren (1-5)
 		const mentalScoreNum = parseInt(mentalScore, 10);
-		if (!mentalScore || isNaN(mentalScoreNum) || mentalScoreNum < 1 || mentalScoreNum > 5) {
+		if (isNaN(mentalScoreNum) || mentalScoreNum < 1 || mentalScoreNum > 5) {
 			errors.mentalScore = 'Mental Score muss zwischen 1 und 5 liegen';
 		}
 
-		// Datum validieren (wenn angegeben muss es in der Vergangenheit liegen)
+		// Datum validieren
 		let createdAt = new Date();
-		if (datetime) {
+		if (!datetime || String(datetime).trim() === '') {
+			errors.datetime = 'Datum ist erforderlich';
+		} else {
 			const parsed = new Date(datetime);
 			if (isNaN(parsed.getTime())) {
 				errors.datetime = 'Ungültiges Datum';
@@ -118,8 +122,8 @@ export const actions = {
 			const result = await trainings.insertOne(trainingRecord);
 			console.log('✓ Training erfolgreich gespeichert (ID:', result.insertedId, ')');
 
-			// 5. Nach erfolgreichem Speichern zur Statistiken-Seite leiten
-			throw redirect(303, '/statistiken');
+			// 5. Nach erfolgreichem Speichern zum Dashboard leiten
+			throw redirect(303, '/dashboard');
 		} catch (error) {
 			// Redirect-Fehler durchreichen (ist gewünscht)
 			if (error.status === 303) {

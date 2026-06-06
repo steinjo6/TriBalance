@@ -131,15 +131,70 @@
 </script>
 
 <style>
-    .calendar-root { max-width: 1100px; margin: 0 auto; font-family: system-ui, sans-serif; color: #0f172a; }
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
-    .calendar-title { font-size: 1.9rem; font-weight: 700; }
-    .calendar-controls { display: flex; gap: 0.75rem; }
-    .calendar-controls button { border: none; background: #0f172a; color: white; padding: 0.75rem 1rem; border-radius: 10px; cursor: pointer; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.75rem; }
-    .weekday-label { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #475569; text-align: center; }
+    .page-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .calendar-root {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+        font-family: system-ui, sans-serif;
+        color: #0f172a;
+        box-sizing: border-box;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .calendar-title {
+        font-size: 1.9rem;
+        font-weight: 700;
+    }
+
+    .calendar-controls {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .calendar-controls button {
+        border: none;
+        background: #0f172a;
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0.75rem;
+    }
+
+    .weekday-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        text-align: center;
+    }
+
     .day-cell {
-        min-height: 140px;
+        min-height: 120px;
         border-radius: 18px;
         background: white;
         padding: 1rem;
@@ -147,11 +202,14 @@
         cursor: pointer;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         gap: 0.75rem;
+        overflow: hidden;
+        position: relative;
     }
 
     .day-cell.not-current {
-        opacity: 0.4;
+        opacity: 0.55;
     }
 
     .day-cell:hover {
@@ -171,11 +229,33 @@
     .training-pill {
         display: inline-flex;
         align-items: center;
+        justify-content: flex-start;
         gap: 0.35rem;
         padding: 0.35rem 0.65rem;
         border-radius: 999px;
         font-size: 0.78rem;
         color: white;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 2rem;
+    }
+
+    .training-pill-indicator {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 50%;
+        background: currentColor;
+        flex-shrink: 0;
+    }
+
+    .training-pill-label {
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 6rem;
+        vertical-align: middle;
     }
 
     .training-pill.past {
@@ -196,6 +276,54 @@
 
     .training-pill.running {
         background: #fb923c;
+    }
+
+    .training-dots-row {
+        display: none;
+        gap: 2px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .training-dot {
+        display: none;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .training-dot.past {
+        background: #94a3b8;
+    }
+
+    .training-dot.planned {
+        background: #fbbf24;
+    }
+
+    .training-dot.swimming {
+        background: #3b82f6;
+    }
+
+    .training-dot.cycling {
+        background: #22c55e;
+    }
+
+    .training-dot.running {
+        background: #fb923c;
+    }
+
+    .training-row {
+        display: grid;
+        gap: 0.35rem;
+    }
+
+    .badge {
+        border-radius: 999px;
+        padding: 0.25rem 0.65rem;
+        font-size: 0.78rem;
+        background: #e2e8f0;
+        color: #334155;
     }
 
     .modal-backdrop {
@@ -311,12 +439,63 @@
         padding: 0.35rem 0.75rem;
         font-size: 0.85rem;
     }
+
+    @media (max-width: 768px) {
+        .calendar-root {
+            padding: 1.5rem 1rem;
+        }
+
+        .calendar-grid {
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.4rem;
+        }
+
+        .weekday-label {
+            font-size: 0.7rem;
+        }
+
+        .day-cell {
+            min-height: 65px;
+            height: 65px;
+            padding: 0.25rem;
+            gap: 0.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .day-number {
+            font-size: 0.85rem;
+        }
+
+        .training-row {
+            display: none;
+        }
+
+        .training-pill {
+            display: none;
+        }
+
+        .training-dots-row {
+            display: flex;
+        }
+
+        .training-dot {
+            display: inline-block;
+        }
+
+        .badge {
+            display: none;
+        }
+    }
 </style>
 
-<div class="calendar-root page-wrapper">
-    <div class="calendar-header">
-        <div>
-            <div class="calendar-title">Kalender</div>
+<div class="page-wrapper">
+    <div class="calendar-root">
+        <div class="calendar-header">
+            <div>
+                <div class="calendar-title">Kalender</div>
             <div style="color:#475569; margin-top:0.35rem;">Hier siehst du vergangene Einheiten und kannst neue Trainings planen.</div>
         </div>
 
@@ -337,19 +516,26 @@
             <button type="button" class="day-cell {day.isCurrentMonth ? '' : 'not-current'}" onclick={() => openDay(day)}>
                 <div class="day-number {day.date.toISOString().slice(0,10) === today.toISOString().slice(0,10) ? 'today' : ''}">{day.date.getDate()}</div>
                 {#if day.trainings.length > 0}
-                    <div style="display:grid; gap:0.35rem;">
+                    <div class="training-row">
                         {#each day.trainings.slice(0, 3) as item}
                             <span class="training-pill {item.isPlanned ? 'planned' : 'past'} {item.sport === 'Laufen' ? 'running' : item.sport === 'Schwimmen' ? 'swimming' : item.sport === 'Radfahren' ? 'cycling' : ''}">
-                                {item.sport} {item.isPlanned ? 'geplant' : '✓'}
+                                <span class="training-pill-indicator" aria-hidden="true"></span>
+                                <span class="training-pill-label">{item.sport} {item.isPlanned ? 'geplant' : '✓'}</span>
                             </span>
                         {/each}
-                        {#if day.trainings.length > 3}
-                            <span class="badge">+{day.trainings.length - 3} weitere</span>
-                        {/if}
                     </div>
+                    <div class="training-dots-row">
+                        {#each day.trainings.slice(0, 3) as item}
+                            <span class="training-dot {item.isPlanned ? 'planned' : 'past'} {item.sport === 'Laufen' ? 'running' : item.sport === 'Schwimmen' ? 'swimming' : item.sport === 'Radfahren' ? 'cycling' : ''}" aria-hidden="true"></span>
+                        {/each}
+                    </div>
+                    {#if day.trainings.length > 3}
+                        <span class="badge">+{day.trainings.length - 3} weitere</span>
+                    {/if}
                 {/if}
             </button>
         {/each}
+    </div>
     </div>
 </div>
 
