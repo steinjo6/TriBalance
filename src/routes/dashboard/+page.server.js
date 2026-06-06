@@ -89,7 +89,7 @@ export async function load({ locals, cookies }) {
     // Nur nach der User-ID filtern, damit das Dashboard alle Einheiten des Nutzers lädt.
     const filter = { userId };
     const allTrainings = await trainings.find(filter).sort({ _id: -1 }).toArray();
-    
+
     const processedTrainings = allTrainings.map(t => ({
         ...t,
         _id: t._id.toString(),

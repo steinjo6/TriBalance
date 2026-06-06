@@ -2,17 +2,30 @@
     // FINAL: Bereinigte Svelte 5 Kalenderansicht für TriBalance
     let { data } = $props();
 
-    const weekDays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-    const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const weekDays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+    const monthNames = [
+        "Januar",
+        "Februar",
+        "März",
+        "April",
+        "Mai",
+        "Juni",
+        "Juli",
+        "August",
+        "September",
+        "Oktober",
+        "November",
+        "Dezember",
+    ];
 
     let monthOffset = $state(0);
     let selectedDate = $state(null);
     let showModal = $state(false);
     let form = $state({
-        sport: 'Laufen',
-        plannedDate: '',
+        sport: "Laufen",
+        plannedDate: "",
         duration: 60,
-        distance: 0
+        distance: 0,
     });
 
     const today = new Date();
@@ -23,23 +36,27 @@
         const now = new Date();
         const month = now.getMonth() + monthOffset;
         const year = now.getFullYear() + Math.floor(month / 12);
-        return new Date(year, (month % 12 + 12) % 12, 1);
+        return new Date(year, ((month % 12) + 12) % 12, 1);
     });
 
-    let monthLabel = $derived(`${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`);
+    let monthLabel = $derived(
+        `${monthNames[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`,
+    );
 
     let trainingMap = $derived.by(() => {
         const map = new Map();
         const trainings = data?.trainings || [];
 
-        const dayKey = date => {
+        const dayKey = (date) => {
             const d = new Date(date);
             d.setHours(0, 0, 0, 0);
             return d.toISOString().slice(0, 10);
         };
 
-        trainings.forEach(item => {
-            const sourceDate = item.isPlanned ? item.plannedDate : item.createdAt || item.plannedDate;
+        trainings.forEach((item) => {
+            const sourceDate = item.isPlanned
+                ? item.plannedDate
+                : item.createdAt || item.plannedDate;
             if (!sourceDate) return;
             const date = new Date(sourceDate);
             if (isNaN(date.getTime())) return;
@@ -65,7 +82,7 @@
                 date,
                 itemKey,
                 isCurrentMonth: date.getMonth() === currentMonth.getMonth(),
-                trainings: trainingMap.get(itemKey) || []
+                trainings: trainingMap.get(itemKey) || [],
             });
         }
 
@@ -97,9 +114,12 @@
     });
 
     let selectedLabel = $derived.by(() => {
-        if (!selectedDate) return '';
-        return selectedDate.toLocaleDateString('de-DE', {
-            weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
+        if (!selectedDate) return "";
+        return selectedDate.toLocaleDateString("de-DE", {
+            weekday: "long",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
         });
     });
 
@@ -123,12 +143,282 @@
     }
 
     function sportColor(sport) {
-        if (sport === 'Laufen') return 'orange';
-        if (sport === 'Schwimmen') return 'royalblue';
-        if (sport === 'Radfahren') return 'seagreen';
-        return 'slategray';
+        if (sport === "Laufen") return "orange";
+        if (sport === "Schwimmen") return "royalblue";
+        if (sport === "Radfahren") return "seagreen";
+        return "slategray";
     }
 </script>
+
+<div class="page-wrapper">
+    <div class="calendar-root">
+        <div class="calendar-header">
+            <div>
+                <div class="calendar-title">Kalender</div>
+                <div style="color:#475569; margin-top:0.35rem;">
+                    Hier siehst du vergangene Einheiten und kannst neue
+                    Trainings planen.
+                </div>
+            </div>
+
+            <div class="calendar-controls">
+                <button type="button" onclick={previousMonth}>← Zurück</button>
+                <button type="button" onclick={nextMonth}>Vor →</button>
+            </div>
+        </div>
+
+        <div style="margin-bottom:1rem; font-weight:600; color:#334155;">
+            {monthLabel}
+        </div>
+
+        <div class="calendar-grid">
+            {#each weekDays as day}
+                <div class="weekday-label">{day}</div>
+            {/each}
+
+            {#each calendarDays as day}
+                <button
+                    type="button"
+                    class="day-cell {day.isCurrentMonth ? '' : 'not-current'}"
+                    onclick={() => openDay(day)}
+                >
+                    <div
+                        class="day-number {day.date
+                            .toISOString()
+                            .slice(0, 10) === today.toISOString().slice(0, 10)
+                            ? 'today'
+                            : ''}"
+                    >
+                        {day.date.getDate()}
+                    </div>
+                    {#if day.trainings.length > 0}
+                        <div class="training-row">
+                            {#each day.trainings.slice(0, 3) as item}
+                                <span
+                                    class="training-pill {item.isPlanned
+                                        ? 'planned'
+                                        : 'past'} {item.sport === 'Laufen'
+                                        ? 'running'
+                                        : item.sport === 'Schwimmen'
+                                          ? 'swimming'
+                                          : item.sport === 'Radfahren'
+                                            ? 'cycling'
+                                            : ''}"
+                                >
+                                    <span
+                                        class="training-pill-indicator"
+                                        aria-hidden="true"
+                                    ></span>
+                                    <span class="training-pill-label"
+                                        >{item.sport}
+                                        {item.isPlanned ? "geplant" : "✓"}</span
+                                    >
+                                </span>
+                            {/each}
+                        </div>
+                        <div class="training-dots-row">
+                            {#each day.trainings.slice(0, 3) as item}
+                                <span
+                                    class="training-dot {item.isPlanned
+                                        ? 'planned'
+                                        : 'past'} {item.sport === 'Laufen'
+                                        ? 'running'
+                                        : item.sport === 'Schwimmen'
+                                          ? 'swimming'
+                                          : item.sport === 'Radfahren'
+                                            ? 'cycling'
+                                            : ''}"
+                                    aria-hidden="true"
+                                ></span>
+                            {/each}
+                        </div>
+                        {#if day.trainings.length > 3}
+                            <span class="badge"
+                                >+{day.trainings.length - 3} weitere</span
+                            >
+                        {/if}
+                    {/if}
+                </button>
+            {/each}
+        </div>
+    </div>
+</div>
+
+{#if showModal}
+    <div
+        class="modal-backdrop"
+        role="button"
+        tabindex="0"
+        onclick={closeModal}
+        onkeydown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                closeModal();
+            }
+        }}
+    >
+        <div
+            class="modal-sheet"
+            role="dialog"
+            tabindex="0"
+            onclick={(event) => event.stopPropagation()}
+            onkeydown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.stopPropagation();
+                }
+            }}
+        >
+            <div class="modal-header">
+                <div>
+                    <div style="font-size:1.3rem; font-weight:700;">
+                        {selectedLabel}
+                    </div>
+                    <div style="color:#64748b; margin-top:0.35rem;">
+                        {selectedIsFuture
+                            ? "Hier kannst du ein neues Training planen."
+                            : "Details zu absolvierten Einheiten."}
+                    </div>
+                </div>
+                <button class="modal-close" type="button" onclick={closeModal}
+                    >✕</button
+                >
+            </div>
+
+            {#if selectedIsFuture}
+                <form class="modal-form" method="POST" action="?/planTraining">
+                    <input
+                        type="hidden"
+                        name="plannedDate"
+                        value={form.plannedDate}
+                    />
+
+                    <div class="field-group">
+                        <label for="sport">Sportart</label>
+                        <select id="sport" name="sport" bind:value={form.sport}>
+                            <option>Laufen</option>
+                            <option>Schwimmen</option>
+                            <option>Radfahren</option>
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label for="duration">Geplante Dauer (Minuten)</label>
+                        <input
+                            id="duration"
+                            name="duration"
+                            type="number"
+                            min="1"
+                            bind:value={form.duration}
+                        />
+                    </div>
+
+                    <div class="field-group">
+                        <label for="distance">Geplante Distanz (km)</label>
+                        <input
+                            id="distance"
+                            name="distance"
+                            type="number"
+                            min="0"
+                            step="0.1"
+                            bind:value={form.distance}
+                        />
+                    </div>
+
+                    <button class="button-primary" type="submit"
+                        >Training planen</button
+                    >
+                </form>
+
+                {#if selectedTrainings.length > 0}
+                    <div class="planned-list" style="margin-top:1.25rem;">
+                        <div style="font-weight:700; color:#334155;">
+                            Geplante Einheiten an diesem Tag
+                        </div>
+                        {#each selectedTrainings as item}
+                            <div class="planned-item">
+                                <div class="planned-meta">
+                                    <span><strong>{item.sport}</strong></span>
+                                    <span
+                                        >{item.distance ?? 0} km • {item.durationMinutes ??
+                                            item.duration ??
+                                            "-"} min</span
+                                    >
+                                </div>
+                                <div
+                                    style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;"
+                                >
+                                    <span
+                                        class="status-chip"
+                                        style="background:{sportColor(
+                                            item.sport,
+                                        )}22; color:{sportColor(item.sport)};"
+                                        >Geplant</span
+                                    >
+                                    <form
+                                        method="POST"
+                                        action="?/toggleComplete"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="id"
+                                            value={item._id}
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="button-primary"
+                                            style="background:{sportColor(
+                                                item.sport,
+                                            )};">Als erledigt markieren</button
+                                        >
+                                    </form>
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            {:else if selectedTrainings.length > 0}
+                <div class="planned-list">
+                    {#each selectedTrainings as item}
+                        <div class="planned-item">
+                            <div
+                                style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;"
+                            >
+                                <span><strong>{item.sport}</strong></span>
+                                <span class="status-chip">Abgeschlossen ✓</span>
+                            </div>
+                            <div class="planned-meta">
+                                <span>{item.distance ?? 0} km</span>
+                                <span
+                                    >{item.durationMinutes ??
+                                        item.duration ??
+                                        "-"} min</span
+                                >
+                                <span
+                                    >{item.createdAt
+                                        ? new Date(
+                                              item.createdAt,
+                                          ).toLocaleTimeString("de-DE", {
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                          })
+                                        : ""}</span
+                                >
+                            </div>
+                            <div style="color:#475569;">
+                                {item.notes ?? "Keine Notizen"}
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            {:else}
+                <p style="color:#475569;">
+                    Für diesen Tag wurden noch keine absolvierten Einheiten
+                    gefunden.
+                </p>
+            {/if}
+        </div>
+    </div>
+{/if}
 
 <style>
     .page-wrapper {
@@ -490,134 +780,3 @@
         }
     }
 </style>
-
-<div class="page-wrapper">
-    <div class="calendar-root">
-        <div class="calendar-header">
-            <div>
-                <div class="calendar-title">Kalender</div>
-            <div style="color:#475569; margin-top:0.35rem;">Hier siehst du vergangene Einheiten und kannst neue Trainings planen.</div>
-        </div>
-
-        <div class="calendar-controls">
-            <button type="button" onclick={previousMonth}>← Zurück</button>
-            <button type="button" onclick={nextMonth}>Vor →</button>
-        </div>
-    </div>
-
-    <div style="margin-bottom:1rem; font-weight:600; color:#334155;">{monthLabel}</div>
-
-    <div class="calendar-grid">
-        {#each weekDays as day}
-            <div class="weekday-label">{day}</div>
-        {/each}
-
-        {#each calendarDays as day}
-            <button type="button" class="day-cell {day.isCurrentMonth ? '' : 'not-current'}" onclick={() => openDay(day)}>
-                <div class="day-number {day.date.toISOString().slice(0,10) === today.toISOString().slice(0,10) ? 'today' : ''}">{day.date.getDate()}</div>
-                {#if day.trainings.length > 0}
-                    <div class="training-row">
-                        {#each day.trainings.slice(0, 3) as item}
-                            <span class="training-pill {item.isPlanned ? 'planned' : 'past'} {item.sport === 'Laufen' ? 'running' : item.sport === 'Schwimmen' ? 'swimming' : item.sport === 'Radfahren' ? 'cycling' : ''}">
-                                <span class="training-pill-indicator" aria-hidden="true"></span>
-                                <span class="training-pill-label">{item.sport} {item.isPlanned ? 'geplant' : '✓'}</span>
-                            </span>
-                        {/each}
-                    </div>
-                    <div class="training-dots-row">
-                        {#each day.trainings.slice(0, 3) as item}
-                            <span class="training-dot {item.isPlanned ? 'planned' : 'past'} {item.sport === 'Laufen' ? 'running' : item.sport === 'Schwimmen' ? 'swimming' : item.sport === 'Radfahren' ? 'cycling' : ''}" aria-hidden="true"></span>
-                        {/each}
-                    </div>
-                    {#if day.trainings.length > 3}
-                        <span class="badge">+{day.trainings.length - 3} weitere</span>
-                    {/if}
-                {/if}
-            </button>
-        {/each}
-    </div>
-    </div>
-</div>
-
-{#if showModal}
-    <div class="modal-backdrop" role="button" tabindex="0" onclick={closeModal} onkeydown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); closeModal(); } }}>
-        <div class="modal-sheet" role="dialog" tabindex="0" onclick={(event) => event.stopPropagation()} onkeydown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.stopPropagation(); } }}>
-            <div class="modal-header">
-                <div>
-                    <div style="font-size:1.3rem; font-weight:700;">{selectedLabel}</div>
-                    <div style="color:#64748b; margin-top:0.35rem;">{selectedIsFuture ? 'Hier kannst du ein neues Training planen.' : 'Details zu absolvierten Einheiten.'}</div>
-                </div>
-                <button class="modal-close" type="button" onclick={closeModal}>✕</button>
-            </div>
-
-            {#if selectedIsFuture}
-                <form class="modal-form" method="POST" action="?/planTraining">
-                    <input type="hidden" name="plannedDate" value={form.plannedDate} />
-
-                    <div class="field-group">
-                        <label for="sport">Sportart</label>
-                        <select id="sport" name="sport" bind:value={form.sport}>
-                            <option>Laufen</option>
-                            <option>Schwimmen</option>
-                            <option>Radfahren</option>
-                        </select>
-                    </div>
-
-                    <div class="field-group">
-                        <label for="duration">Geplante Dauer (Minuten)</label>
-                        <input id="duration" name="duration" type="number" min="1" bind:value={form.duration} />
-                    </div>
-
-                    <div class="field-group">
-                        <label for="distance">Geplante Distanz (km)</label>
-                        <input id="distance" name="distance" type="number" min="0" step="0.1" bind:value={form.distance} />
-                    </div>
-
-                    <button class="button-primary" type="submit">Training planen</button>
-                </form>
-
-                {#if selectedTrainings.length > 0}
-                    <div class="planned-list" style="margin-top:1.25rem;">
-                        <div style="font-weight:700; color:#334155;">Geplante Einheiten an diesem Tag</div>
-                        {#each selectedTrainings as item}
-                            <div class="planned-item">
-                                <div class="planned-meta">
-                                    <span><strong>{item.sport}</strong></span>
-                                    <span>{item.distance ?? 0} km • {item.durationMinutes ?? item.duration ?? '-'} min</span>
-                                </div>
-                                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-                                    <span class="status-chip" style="background:{sportColor(item.sport)}22; color:{sportColor(item.sport)};">Geplant</span>
-                                    <form method="POST" action="?/toggleComplete">
-                                        <input type="hidden" name="id" value={item._id} />
-                                        <button type="submit" class="button-primary" style="background:{sportColor(item.sport)};">Als erledigt markieren</button>
-                                    </form>
-                                </div>
-                            </div>
-                        {/each}
-                    </div>
-                {/if}
-            {:else}
-                {#if selectedTrainings.length > 0}
-                    <div class="planned-list">
-                        {#each selectedTrainings as item}
-                            <div class="planned-item">
-                                <div style="display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap;">
-                                    <span><strong>{item.sport}</strong></span>
-                                    <span class="status-chip">Abgeschlossen ✓</span>
-                                </div>
-                                <div class="planned-meta">
-                                    <span>{item.distance ?? 0} km</span>
-                                    <span>{item.durationMinutes ?? item.duration ?? '-'} min</span>
-                                    <span>{item.createdAt ? new Date(item.createdAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : ''}</span>
-                                </div>
-                                <div style="color:#475569;">{item.notes ?? 'Keine Notizen'}</div>
-                            </div>
-                        {/each}
-                    </div>
-                {:else}
-                    <p style="color:#475569;">Für diesen Tag wurden noch keine absolvierten Einheiten gefunden.</p>
-                {/if}
-            {/if}
-        </div>
-    </div>
-{/if}
