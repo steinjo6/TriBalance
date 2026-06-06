@@ -200,6 +200,6 @@ Generierte Codevorschläge wurden niemals blind übernommen. Jede KI-Antwort wur
 
 ## 7. Anhang [Optional]
 * **Rohdaten/Auswertung:** Die originalen, handschriftlichen Vorbereitungs-Skripte, Testszenarien sowie die Usability-Protokolle der Nutzertests mit Silvan und Dilara wurden vollständig abfotografiert und als unzensierte visuelle Evidenz im Repository hinterlegt:
-  * [Originales Usability-Protokoll Seite 1](documentation/assets/Feedback_Dilara.jpg)
-  * [Originales Usability-Protokoll Seite 2](documentation/assets/Feedback_Silvan.jpg)
-  * [Originales Usability-Protokoll Seite 3](documentation/assets/Vorbereitung_Evaluation.jpg)
+  * ![Originales Usability-Protokoll Seite 1](documentation/assets/Feedback_Dilara.jpg)
+* ![Originales Usability-Protokoll Seite 2](documentation/assets/Feedback_Silvan.jpg)
+* ![Originales Usability-Protokoll Seite 3](documentation/assets/Vorbereitung_Evaluation.jpg)
