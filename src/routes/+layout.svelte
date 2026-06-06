@@ -26,8 +26,7 @@
         <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;" />
 
         {#if data?.user}
-            <a href="/logout" class="menu-item" style="color:#f87171;"
-                >Ausloggen</a
+            <a href="/logout" class="menu-item" style="color:#f87171;">Logout</a
             >
         {:else}
             <a href="/login" class="menu-item">Login</a>
@@ -45,7 +44,7 @@
             <a href="/kalender" class="mobile-nav-link">Kalender</a>
             <a href="/statistiken" class="mobile-nav-link">Statistiken</a>
             <a href="/logout" class="mobile-nav-link" style="color:#f87171;"
-                >Ausloggen</a
+                >Logout</a
             >
         </nav>
     {/if}
