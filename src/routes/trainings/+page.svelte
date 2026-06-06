@@ -88,7 +88,9 @@
 
     let showLiveFinish = $state(false);
 
-    let liveDistance = $state('');
+    let liveDistance = $state(0);
+    let watchId = null;
+    let lastPosition = null;
 
     let livePain = $state(3);
 
@@ -112,7 +114,20 @@
 
     })());
 
+    function haversineDistance(coord1, coord2) {
+        const toRadians = (deg) => deg * (Math.PI / 180);
+        const R = 6371; // Erdradius in Kilometern
+        const dLat = toRadians(coord2.latitude - coord1.latitude);
+        const dLon = toRadians(coord2.longitude - coord1.longitude);
+        const lat1 = toRadians(coord1.latitude);
+        const lat2 = toRadians(coord2.latitude);
 
+        const a = Math.sin(dLat / 2) ** 2
+            + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
 
     function startLive() {
 
@@ -122,7 +137,38 @@
 
         showLiveFinish = false;
 
+        liveDistance = 0;
+        lastPosition = null;
+
         timerId = setInterval(() => { elapsed = elapsed + 1; }, 1000);
+
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const currentPosition = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+
+                    if (lastPosition) {
+                        const deltaKm = haversineDistance(lastPosition, currentPosition);
+                        liveDistance = Number((liveDistance + deltaKm).toFixed(2));
+                    }
+
+                    lastPosition = currentPosition;
+                },
+                (error) => {
+                    console.warn('GPS-Tracking-Fehler:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 1000,
+                    timeout: 10000
+                }
+            );
+        } else {
+            console.warn('Geolocation wird von diesem Gerät nicht unterstützt.');
+        }
 
     }
 
@@ -133,11 +179,29 @@
         isLive = false;
 
         if (timerId) { clearInterval(timerId); timerId = null; }
+        if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
 
         showLiveFinish = true;
 
     }
 
+
+
+    function cancelLiveTracking() {
+
+        isLive = false;
+
+        if (timerId) { clearInterval(timerId); timerId = null; }
+        if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+
+        elapsed = 0;
+        liveDistance = 0;
+        lastPosition = null;
+        showLiveFinish = false;
+
+        window.location.href = '/dashboard';
+
+    }
 
 
     async function submitLive() {
@@ -588,6 +652,37 @@
 
     }
 
+    .btn-cancel {
+
+        width: 100%;
+
+        margin-top: 0.75rem;
+
+        padding: 1rem;
+
+        background-color: #ef4444;
+
+        color: white;
+
+        border: none;
+
+        border-radius: 10px;
+
+        font-weight: bold;
+
+        font-size: 1rem;
+
+        cursor: pointer;
+
+        transition: background 0.2s;
+
+    }
+
+    .btn-cancel:hover {
+
+        background-color: #dc2626;
+
+    }
 
 
     .stoppuhr-container {
@@ -781,9 +876,9 @@
 
                         <div class="form-group">
 
-                            <label for="live-distance" class="form-label">Distanz (optional, km)</label>
+                            <label for="live-distance" class="form-label">LIVE-DISTANZ (KM) *</label>
 
-                            <input id="live-distance" type="number" min="0" step="0.01" bind:value={liveDistance} class="custom-input" />
+                            <input id="live-distance" type="number" min="0" step="0.01" bind:value={liveDistance} class="custom-input" readonly={isLive} />
 
                         </div>
 
@@ -810,6 +905,12 @@
                         <button type="button" class="primary-btn" onclick={submitLive} disabled={isSubmitting}>
 
                             {isSubmitting ? 'Speichert…' : '✓ Speichern & beenden'}
+
+                        </button>
+
+                        <button type="button" class="btn-cancel" onclick={cancelLiveTracking}>
+
+                            ✕ Abbrechen & Verwerfen
 
                         </button>
 
